@@ -44,17 +44,3 @@ class Player(sp.Sprite):
 
             if self.rect.y >= 350:
                 self.is_on_ground = True
-       
-
-
-
-
- 
-          
-
-
-    
-    
-
-        
-        

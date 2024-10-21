@@ -45,5 +45,3 @@ class Map:
         y = row * self.TILE_HEIGHT 
 
         return tile_set.subsurface((x,y,self.TILE_WIDTH,self.TILE_HEIGHT))
-
-        

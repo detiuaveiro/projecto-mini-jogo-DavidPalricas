@@ -3,7 +3,6 @@ import pygame.sprite as pgs
 import map as mp
 import player as pl
 
-
 def main():
     pg.init()
 
@@ -53,4 +52,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

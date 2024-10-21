@@ -11,7 +11,4 @@ class Sprite:
     # This method must be implemented
     # To add the sprite to the group
     def update(self):
-        pass
-
-
-        
+        pass    
