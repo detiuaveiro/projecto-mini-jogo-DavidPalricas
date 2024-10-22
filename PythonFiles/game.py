@@ -2,6 +2,7 @@ import pygame as pg
 import pygame.sprite as pgs
 import game_map as gm
 import player as pl
+import sound_player as sp
 
 def update_display(all_sprites, window, game_map,clock):
     """ Update the display for the game
@@ -50,6 +51,9 @@ def game_loop(all_sprites, window, clock):
     game_map =gm.Map()
     player  = all_sprites.sprites()[0]
     running = True
+    
+    #The background music is uneusable in the current state of the game, but it will be used in the future
+    background_music = sp.SoundPlayer("overworld_theme",True).play()
 
     # Set up the game loop
     while running:
