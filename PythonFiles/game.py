@@ -99,7 +99,7 @@ def main():
     """ Main function for the game 
         It sets up the game and runs the game loop
     """
-  
+ 
     window,clock =  setup_pygame()
 
     all_sprites = setup_sprites(window)
