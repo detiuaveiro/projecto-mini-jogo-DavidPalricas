@@ -1,6 +1,6 @@
 import pygame as pg
 import pygame.sprite as pgs
-import map as mp
+import game_map as gm
 import player as pl
 
 def update_display(all_sprites, window, game_map,clock):
@@ -47,7 +47,7 @@ def game_loop(all_sprites, window, clock):
 
         Parameters: all_sprites (stores the sprite group), window (stores the pygame display), clock (stores the pygame clock)
     """
-    game_map = mp.Map()
+    game_map =gm.Map()
     player  = all_sprites.sprites()[0]
     running = True
 
