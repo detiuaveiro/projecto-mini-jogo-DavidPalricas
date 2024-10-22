@@ -4,8 +4,11 @@ class Sprite:
     """ A class to represent a sprite in the game"""
 
     def __init__(self,sprite_path,coordinates): 
-        """ Constructor for the Sprite class"""
-        """ Parameters: sprite_path (stores the path to the sprite image), coordinates (stores the coordinates of the sprite)"""    
+        """ Constructor for the Sprite class
+            Set the image ,the rect attributes and the add_internal and remove_internal methods
+            
+            Parameters: sprite_path (stores the path to the sprite image), coordinates (stores the coordinates of the sprite)
+        """    
 
         self.image = pg.image.load(sprite_path).convert_alpha()
         self.rect = pgs.Rect(coordinates)

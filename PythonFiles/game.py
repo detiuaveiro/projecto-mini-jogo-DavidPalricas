@@ -26,7 +26,7 @@ def update_display(all_sprites, window, game_map,clock):
 def event_handler(running, player):
     """ Handle the events for the game
         It handles the events for the game like quitting the game and moving the player
-
+        C
         Parameters: running (stores the state of the game), player (stores the player sprite)
         Return the running variable (stores the state of the game)
     """
