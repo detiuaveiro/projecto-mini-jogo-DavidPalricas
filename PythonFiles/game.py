@@ -24,18 +24,16 @@ def update_display(all_sprites, window, game_map,clock):
     clock.tick(60)
 
 
-def event_handler(running, player):
+def event_handler(running):
     """ Handle the events for the game
-        It handles the events for the game like quitting the game and moving the player
-        C
-        Parameters: running (stores the state of the game), player (stores the player sprite)
+        It handles the events for the game like quitting the game
+        
+        Parameters: running (stores the state of the game)
         Return the running variable (stores the state of the game)
     """
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
-        elif event.type == pg.KEYDOWN:
-            player.move(event.key)
 
     return running
     
@@ -43,7 +41,7 @@ def event_handler(running, player):
 
 def game_loop(all_sprites, window, clock):
     """ Game loop for the game
-        It runs the game loop, handles events, do the game logic and updates the display
+        It runs the game loop, handles events, do the game logic (moves the player based on the given key pressed) and updates the display
         If running is False, the game loop stops
 
         Parameters: all_sprites (stores the sprite group), window (stores the pygame display), clock (stores the pygame clock)
@@ -57,10 +55,10 @@ def game_loop(all_sprites, window, clock):
 
     # Set up the game loop
     while running:
-        running = event_handler(running, player)
-
-        player.handling_fall()
-     
+        running = event_handler(running)
+        
+        player.move(pg.key.get_pressed())
+    
         update_display(all_sprites, window, game_map,clock)
 
 
