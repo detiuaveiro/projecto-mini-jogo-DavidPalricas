@@ -60,7 +60,7 @@ def game_loop(all_sprites, window, clock, game_map):
 
 
 
-def setup_sprites(window):
+def setup_sprites():
     """ Set up the sprites for the game by creating a sprite group and adding the individual sprites to it
         Return the all_sprites variable (stores the sprite group)
     """
@@ -92,7 +92,7 @@ def setup_pygame():
 def main():
     window, clock = setup_pygame()
     window_width, window_height = 1020, 720
-    all_sprites = setup_sprites(window)
+    all_sprites = setup_sprites()
     game_map = gm.Map(window_width, window_height)
 
     game_loop(all_sprites, window, clock, game_map)
