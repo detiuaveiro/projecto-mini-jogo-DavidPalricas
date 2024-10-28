@@ -39,44 +39,36 @@ def event_handler(running):
     
 
 
-def game_loop(all_sprites, window, clock):
-    """ Game loop for the game
-        It runs the game loop, handles events, do the game logic (moves the player based on the given key pressed) and updates the display
-        If running is False, the game loop stops
-
-        Parameters: all_sprites (stores the sprite group), window (stores the pygame display), clock (stores the pygame clock)
-    """
-    game_map =gm.Map()
-    player  = all_sprites.sprites()[0]
+def game_loop(all_sprites, window, clock, game_map):
     running = True
-    
-    #The background music is uneusable in the current state of the game, but it will be used in the future
-    background_music = sp.SoundPlayer("overworld_theme",True).play()
-
-    # Set up the game loop
+    background_music = sp.SoundPlayer("overworld_theme", True).play()
     while running:
-        running = event_handler(running)
-        
-        player.move(pg.key.get_pressed())
-    
-        update_display(all_sprites, window, game_map,clock)
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+
+        # Update and draw all sprites
+        all_sprites.update()
+        window.fill((0, 0, 0))  # Clear the screen with black
+        game_map.draw(window)   # Draw the game map
+        all_sprites.draw(window)  # Draw all sprites on top of the map
+
+        pg.display.flip()  # Update the display
+        clock.tick(60)  # Cap the frame rate at 60 FPS
+
+    pg.quit()
 
 
 
 def setup_sprites(window):
-    """ Set up the sprites for the game by creating a sprite group and adding the individual srites to it
-        Return the all_sprites variable ( stores the sprite group)
-
-        Parameters: window (stores the pygame display)
+    """ Set up the sprites for the game by creating a sprite group and adding the individual sprites to it
+        Return the all_sprites variable (stores the sprite group)
     """
-    all_sprites = pgs.Group()
-
-    player = pl.Player()
-
+    all_sprites = pg.sprite.Group()
+    grid_size = 40
+    ground_level = 680  # Adjust this value based on your ground level
+    player = pl.Player(grid_size, ground_level)
     all_sprites.add(player)
-
-    all_sprites.draw(window)
-
     return all_sprites
 
 
@@ -89,7 +81,7 @@ def setup_pygame():
     pg.init()
 
     # Set up the display
-    window = pg.display.set_mode((600, 400))
+    window = pg.display.set_mode((1020, 720))
     pg.display.set_caption("Super Bowser")
 
     clock = pg.time.Clock()
@@ -98,17 +90,12 @@ def setup_pygame():
 
 
 def main():
-    """ Main function for the game 
-        It sets up the game and runs the game loop
-    """
- 
-    window,clock =  setup_pygame()
-
+    window, clock = setup_pygame()
+    window_width, window_height = 1020, 720
     all_sprites = setup_sprites(window)
+    game_map = gm.Map(window_width, window_height)
 
-    game_loop(all_sprites, window, clock)
-   
-    pg.quit()
+    game_loop(all_sprites, window, clock, game_map)
 
 if __name__ == "__main__":
     main()

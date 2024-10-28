@@ -1,4 +1,5 @@
 from pygame import mixer
+import os
 
 class SoundPlayer:
     """ A class to represent a sound player in the game
@@ -13,7 +14,12 @@ class SoundPlayer:
         mixer.init()
 
         self.is_music = is_music
-        self.sound = mixer.Sound(f"../Assets/SoundTrack/Music/{sound_name}.wav") if self.is_music else mixer.Sound(f"../Assets/SoundTrack/SoundEffects/{sound_name}.wav")
+        if self.is_music:
+            sound_path = os.path.join(os.path.dirname(__file__), f"../Assets/SoundTrack/Music/{sound_name}.wav")
+        else:
+            sound_path = os.path.join(os.path.dirname(__file__), f"../Assets/SoundTrack/SoundEffects/{sound_name}.wav")
+
+        self.sound = mixer.Sound(sound_path)
 
     def play(self):
         """ Method to play the sound
