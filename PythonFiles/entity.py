@@ -1,4 +1,5 @@
 from sprite import Sprite
+import pygame as pg
 
 class Entity(Sprite):
     def __init__(self, sprite_path,grid_size, ground_level):
@@ -14,6 +15,7 @@ class Entity(Sprite):
         self.states = None
         self.transitions = None
         self.fsm = None
+        self.name = None
 
 
     def set_states(self) :
@@ -22,4 +24,12 @@ class Entity(Sprite):
 
     def set_transitions(self):
         raise NotImplementedError
+    
+
+    def change_sprite(self,new_image):
+        self.image = new_image
+        
+    
+
+
   

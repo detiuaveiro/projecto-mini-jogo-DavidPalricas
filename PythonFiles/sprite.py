@@ -21,4 +21,5 @@ class Sprite:
         """ Method to update the sprite
             This method must be implemented even if it does nothing, for  instance of the Sprite class could be updated by  the sprite group define in the game.py
         """
-        pass    
+        pass  
+ 

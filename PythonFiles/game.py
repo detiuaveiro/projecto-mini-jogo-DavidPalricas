@@ -1,5 +1,4 @@
 import pygame as pg
-import pygame.sprite as pgs
 import game_map as gm
 import player as pl
 import sound_player as sp

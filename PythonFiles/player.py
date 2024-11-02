@@ -17,15 +17,14 @@ class Player(Entity):
         sprite_path = os.path.join(os.path.dirname(__file__), "../Assets/SpriteSheets/Bowser/Idle/bowser_idle.png")
         super().__init__(sprite_path, grid_size, ground_level)
     
-        
-        self.movement_keys = [pg.K_a, pg.K_d, pg.K_RIGHT, pg.K_LEFT, pg.K_SPACE]
-
         self.speed = 1.8
         self.jump_speed = 50
         self.states = self.set_states()
         self.transitions = self.set_transitions()
         self.fsm = fsm.FSM(self.states, self.transitions)
         self.sound_player = sp.SoundPlayer("jump", False)
+        self.name = "Bowser"
+        self.last_key_pressed = None
     
 
     def set_states(self):
@@ -53,8 +52,9 @@ class Player(Entity):
                 
     def update(self):
         """ Update the player's position based on the keys pressed """
-        keys = pg.key.get_pressed()
-        self.move(keys)
+        pressed_keys = pg.key.get_pressed()
+        self.move(pressed_keys)
+        
     
     def move(self, keys):
         """ Method to move the player
@@ -76,14 +76,22 @@ class Player(Entity):
                 if not self.turned_right:
                     self.image = pg.transform.flip(self.image, True, False)
                     self.turned_right = True
-                self.fsm.update("idle", self)
+
+                self.last_key_pressed = pg.K_d if keys[pg.K_d] else pg.K_RIGHT
+
             elif keys[pg.K_a] or keys[pg.K_LEFT]:
                 self.fsm.update("walk", self)
                 self.rect.x -= 2 * self.speed if keys[pg.K_LSHIFT] else self.speed
                 if self.turned_right:
                     self.image = pg.transform.flip(self.image, True, False)
                     self.turned_right = False
+                
+                self.last_key_pressed = pg.K_d if keys[pg.K_d] else pg.K_RIGHT
+            
+            # Check if the player stopped moving horizontally
+            if self.last_key_pressed != None and not keys[self.last_key_pressed]:
                 self.fsm.update("idle", self)
+
     
     def to_jump(self):
         """ Method to make the player jump
