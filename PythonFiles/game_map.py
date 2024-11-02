@@ -2,40 +2,44 @@ import pygame as pg
 import os
 
 class Map:
+    """ A class to represent the game map """
+
     def __init__(self, window_width, window_height):
-        # Construct the absolute path to the sprite image
-        sprite_path = os.path.join(os.path.dirname(__file__), "../Assets/SpriteSheets/Map/overworld_map.bmp")
-        if not os.path.isfile(sprite_path):
-            raise FileNotFoundError(f"No such file: '{sprite_path}'")
-        self.tile_set = pg.image.load(sprite_path).convert_alpha()
-        self.TILE_WIDTH = 17
-        self.TILE_HEIGHT = 19
-        self.tile_per_row = self.tile_set.get_width() // self.TILE_WIDTH
-        self.tile_per_col = self.tile_set.get_height() // self.TILE_HEIGHT
+        """Initialize the map, resize it to fit the window, and load map layout."""
+        map_path = os.path.join(os.path.dirname(__file__), "../Assets/SpriteSheets/Map/overworld_map.bmp")
+        self.map_image = pg.image.load(map_path)
+        self.map_image = pg.transform.scale(self.map_image, (window_width, window_height))  # Resize map to window dimensions
+        self.rect = self.map_image.get_rect()
 
-        # Calculate the scale factor to fill the window
-        self.scale_factor_x = window_width / (self.tile_per_row * self.TILE_WIDTH)
-        self.scale_factor_y = window_height / (self.tile_per_col * self.TILE_HEIGHT)
+        # Define map grid properties
+        self.tile_size = 40  # Each tile is 40x40 pixels
+        self.grid_width = window_width // self.tile_size
+        self.grid_height = window_height // self.tile_size
 
-        # Calculate the number of rows and columns needed to fill the screen
-        num_cols = int(window_width // (self.TILE_WIDTH * self.scale_factor_x))
-        num_rows = int(window_height // (self.TILE_HEIGHT * self.scale_factor_y))
+        # Example layout: 1 = ground, 0 = empty space
+        # This should ideally be loaded from a file for complex maps.
+        self.layout = [
+            [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            # More rows here based on map structure...
+        ]
 
-        # Generate the map dynamically
-        self.map = [[(row * num_cols + col) % (self.tile_per_row * self.tile_per_col) for col in range(num_cols)] for row in range(num_rows)]
-    
     def draw(self, window):
-        for row_index, row in enumerate(self.map):
-            for col_index, tile_index in enumerate(row):
-                tile_image = self.get_tile_image(self.tile_set, tile_index)
-                scaled_tile_image = pg.transform.scale(tile_image, (int(self.TILE_WIDTH * self.scale_factor_x), int(self.TILE_HEIGHT * self.scale_factor_y)))
-                window.blit(scaled_tile_image, (col_index * self.TILE_WIDTH * self.scale_factor_x, row_index * self.TILE_HEIGHT * self.scale_factor_y))
+        """Draw the resized map and grid-based ground layout on the window."""
+        window.blit(self.map_image, (0, 0))
 
-    def get_tile_image(self, tile_set, tile_index):
-        row = tile_index // self.tile_per_row
-        column = tile_index % self.tile_per_row
+    def is_ground(self, x, y):
+        """Check if a given tile (x, y) represents ground."""
+        tile_x = x // self.tile_size
+        tile_y = y // self.tile_size
 
-        x = column * self.TILE_WIDTH 
-        y = row * self.TILE_HEIGHT 
+        # Ensure the coordinates are within the layout bounds
+        if 0 <= tile_y < len(self.layout) and 0 <= tile_x < len(self.layout[0]):
+            return self.layout[tile_y][tile_x] == 1
+        return False
 
-        return tile_set.subsurface((x, y, self.TILE_WIDTH, self.TILE_HEIGHT))
+    def update_camera(self, player):
+        """Update camera position based on player position."""
+        self.rect.centerx = player.rect.centerx
+        self.rect.centery = player.rect.centery
