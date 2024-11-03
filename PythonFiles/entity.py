@@ -18,8 +18,6 @@ class Entity(Sprite):
         self.name = None
         self.animator = Animator()
 
-
-
     def set_states(self) :
         raise NotImplementedError
     
@@ -27,11 +25,5 @@ class Entity(Sprite):
     def set_transitions(self):
         raise NotImplementedError
     
-
-    def change_sprite(self,new_image):
-        self.image = new_image
-        
-    
-
 
   

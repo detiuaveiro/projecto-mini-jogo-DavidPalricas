@@ -39,17 +39,15 @@ class Animator:
         
         # Check if the image is a tileset (based on the width of the original sprite)
         if new_image.get_width() > entity.dimensions[0]:
-            return self.split_tileset(new_image, entity.dimensions)
+            return self.split_tileset(new_image, entity.dimensions[0])
         else:      
             # To ensure that all the frames have the same width as the original sprite
             return [pg.transform.scale(new_image,(entity.dimensions[0],new_image.get_height()))]
 
-    def split_tileset(self, tile_set, sprite_dimensions):
+    def split_tileset(self, tile_set, sprite_width):
         """ Split the tileset into individual frames """
         frames = []
         
-        sprite_width, sprite_height = sprite_dimensions
-
         num_frames = round(tile_set.get_width() / sprite_width)
         
         for i in range(num_frames):
