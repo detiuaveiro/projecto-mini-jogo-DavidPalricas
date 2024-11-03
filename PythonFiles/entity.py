@@ -1,5 +1,5 @@
 from sprite import Sprite
-import pygame as pg
+from animator import Animator
 
 class Entity(Sprite):
     def __init__(self, sprite_path,grid_size, ground_level):
@@ -16,6 +16,8 @@ class Entity(Sprite):
         self.transitions = None
         self.fsm = None
         self.name = None
+        self.animator = Animator()
+
 
 
     def set_states(self) :

@@ -11,6 +11,7 @@ class Sprite:
         """    
 
         self.image = pg.image.load(sprite_path).convert_alpha()
+        self.dimensions = (self.image.get_width(), self.image.get_height())
         self.rect = pgs.Rect(coordinates)
         
         # The add_internal and remove_internal methods are implemented to be possible for add and remove instance of the Sprite class from the sprite group define in the game.py
