@@ -67,10 +67,14 @@ class Animator:
             Returns:
                 - frames (list): A list of the animation frames     
         """
+        if entity.name == "Bowser":
+            new_image = pg.image.load(os.path.join(os.path.dirname(__file__), f"../Assets/SpriteSheets/{entity.name}/{state}/{entity.name}_{state}.png")).convert_alpha()
+        else: 
+            new_image = pg.image.load(os.path.join(os.path.dirname(__file__), f"../Assets/SpriteSheets/Enemies/{entity.name}/{state}/{entity.name}_{state}.png")).convert_alpha()
 
-        new_image = pg.image.load(os.path.join(os.path.dirname(__file__), f"../Assets/SpriteSheets/{entity.name}/{state}/{entity.name}_{state}.png")).convert_alpha()
-        
         # Check if the image is a tileset (based on the width of the original sprite)
+
+   
         if new_image.get_width() > entity.dimensions[0]:
             return self.split_tileset(new_image, entity.dimensions[0])
         else:      
@@ -91,6 +95,8 @@ class Animator:
         frames = []
         
         num_frames = round(tile_set.get_width() / sprite_width)
+
+       
         
         for i in range(num_frames):
             if i == 0:

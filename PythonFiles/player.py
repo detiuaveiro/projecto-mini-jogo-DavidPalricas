@@ -44,9 +44,7 @@ class Player(Entity):
         self.name = "Bowser"
 
         # Initialize FSM and states
-        self.states = self.set_states()
-        self.transitions = self.set_transitions()
-        self.fsm = fsm.FSM(self.states, self.transitions)
+        self.fsm = fsm.FSM(self.set_states(), self.set_transitions())
 
      
     def set_states(self):

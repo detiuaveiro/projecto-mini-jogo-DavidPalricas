@@ -1,7 +1,8 @@
 import pygame as pg
 import game_map as gm
-import player as pl
+from player import Player
 import sound_player as sp
+from kirby import Kirby
 
 def update_display(all_sprites, window, game_map, player, clock):
     """
@@ -67,7 +68,7 @@ def game_loop(all_sprites, window, clock, game_map):
     background_music = sp.SoundPlayer("overworld_theme", True).play()
 
     # Get the player object from all_sprites
-    player = next(sprite for sprite in all_sprites if isinstance(sprite, pl.Player))  
+    player = next(sprite for sprite in all_sprites if isinstance(sprite, Player))  
 
     while running:
         running = event_handler(running)
@@ -94,8 +95,10 @@ def setup_sprites(game_map):
     all_sprites = pg.sprite.Group()
     grid_size = 40
     ground_level = 680
-    player = pl.Player(grid_size, ground_level, game_map) 
+    player = Player(grid_size, ground_level, game_map) 
+    kirby = Kirby(grid_size, ground_level)
     all_sprites.add(player)
+    all_sprites.add(kirby)
 
     return all_sprites
 
