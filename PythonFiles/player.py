@@ -1,32 +1,30 @@
+import os
 import pygame as pg
 from entity import Entity
 import sound_player as sp
 import finite_state_machine as fsm
-import os
 
 class Player(Entity):
     """
-        The Player class is responsible for managing the player entity in the game world
-       
-        The class has the following attributes:
-            - jump_speed: The speed of the player's jump
-            - sound_player: The sound player of the player
-            - last_key_pressed: The last key pressed by the player
-            - game_map: The game map
+    The Player class is responsible for managing the player entity in the game world.
+    
+    The class has the following attributes:
+        - jump_speed: The speed of the player's jump
+        - sound_player: The sound player of the player
+        - last_key_pressed: The last key pressed by the player
+        - game_map: The game map
     """
-
     def __init__(self, grid_size, ground_level, game_map): 
         """
-            Initializes a new instance of the Player class, and calls the constructor of the Entity class (the parent class)
-            Loads the sprite image for the player
-            Sets up the player's attributes and the attributes inherited from the Entity class including the FSM and its states
+        Initializes a new instance of the Player class, and calls the constructor of the Entity class (the parent class).
+        Loads the sprite image for the player.
+        Sets up the player's attributes and the attributes inherited from the Entity class including the FSM and its states.
 
-            Args:
-                - grid_size (int): The size of the grid in the game world
-                - ground_level (int): The level of the ground in the game world
-                - game_map (GameMap): The game map
+        Args:
+            - grid_size (int): The size of the grid in the game world
+            - ground_level (int): The level of the ground in the game world
+            - game_map (GameMap): The game map
         """
-
         sprite_path = os.path.join(os.path.dirname(__file__), "../Assets/SpriteSheets/Bowser/Idle/bowser_idle.png")
         super().__init__(sprite_path, grid_size, ground_level)
 
@@ -36,7 +34,7 @@ class Player(Entity):
         self.last_key_pressed = None
         self.game_map = game_map
 
-        # Set up the atrributes inherited from the Entity class
+        # Set up the attributes inherited from the Entity class
         self.speed = 1.8
         self.gravity = 1
         self.is_on_ground = True
@@ -46,130 +44,90 @@ class Player(Entity):
         # Initialize FSM and states
         self.fsm = fsm.FSM(self.set_states(), self.set_transitions())
 
-     
+        # Set the player's initial position on the ground
+        self.rect.x = 0
+        self.rect.bottom = ground_level
+
     def set_states(self):
-        """ The set_states method is responsible for setting the states of the player e.g. (idle, walk, jump)
-            Returns:
-                - states (list): A list of the player's states
         """
-        self.idle = fsm.Idle()
-        self.walk = fsm.Walk()
-        self.jump = fsm.Jump()
-
-        return [self.idle, self.walk, self.jump]
-    
-    def set_transitions(self):
-        """ The set_transitions method is responsible for setting the transitions between the player's states
-
-            Returns:
-                - transitions (dict): A dictionary of the player's transitions
+        Sets up the states for the FSM.
+        
+        :return: A dictionary of states.
         """
-        return {
-            "walk": fsm.Transition(self.idle, self.walk),
-            "jump": fsm.Transition(self.idle, self.jump),
-            "idle": fsm.Transition(self.walk, self.idle),
-            "fall": fsm.Transition(self.jump, self.idle)
+        states = {
+            "idle": self.idle_state,
+            "jump": self.jump_state,
+            "walk": self.walk_state,
         }
-                
+        return states
+
+    def set_transitions(self):
+        """
+        Sets up the transitions for the FSM.
+        
+        :return: A dictionary of transitions.
+        """
+        transitions = {
+            "idle_to_jump": ("idle", "jump"),
+            "jump_to_idle": ("jump", "idle"),
+            "idle_to_walk": ("idle", "walk"),
+            "walk_to_idle": ("walk", "idle"),
+        }
+        return transitions
+
+    def idle_state(self):
+        """
+        The idle state of the player.
+        """
+        pass
+
+    def jump_state(self):
+        """
+        The jump state of the player.
+        """
+        pass
+
+    def walk_state(self):
+        """
+        The walk state of the player.
+        """
+        pass
+
     def update(self):
-        """ The update method is responsible for move the player based on pressed keys, applying gravity, and playing animations
-           Calling respectively this methods: move, apply_gravity, play_animation (from the animator attribute)
         """
-        pressed_keys = pg.key.get_pressed()
-    
-        if not self.is_on_ground:
-            self.apply_gravity()
-        else: 
-            self.move(pressed_keys)
-
-        self.animator.play_animation(self.fsm.current.name, self)
-
-
-    def move(self, keys):
-        """ The move method is responsible for moving the player based on the pressed keys and sets the player idle if the previous movement key is  released
-            If the player presses the space key, W key, or UP key, the initiate_jump method is called to make the player jump
-            If the player presses the D key or RIGHT key, the move_right method is called to move the player to the right
-            If the player presses the A key or LEFT key, the move_left method is called to move the player to the left
-
-            Args:
-                - keys (list): A list of the pressed keys
+        Updates the player's state and position.
         """
-
-        if keys[pg.K_SPACE] or keys[pg.K_UP] or keys[pg.K_w]:
-            self.initiate_jump()
-        elif keys[pg.K_d] or keys[pg.K_RIGHT]:
-            self.move_right(keys)
-        elif keys[pg.K_a] or keys[pg.K_LEFT]:
-            self.move_left(keys)
-            
-            # Transition to idle state if no horizontal movement key is pressed
-        if self.last_key_pressed and not keys[self.last_key_pressed]:
-            self.fsm.update("idle", self)
-            self.last_key_pressed = None
-       
-        
-
-    def move_right(self, keys):
-        """ The move_right method is responsible for moving the player to the right, handling sprint and sprite flip.
-            It also updates the last_key_pressed attribute to the key pressed and updates the player's state to walk if it's not already in that state
-
-            Args:
-             - keys (list): A list of the pressed keys
-        """
-        
-        self.last_key_pressed = pg.K_d if keys[pg.K_d] else pg.K_RIGHT
-
-        if self.fsm.current != self.walk:
-            self.fsm.update("walk", self)
-
-        self.rect.x += 2 * self.speed if keys[pg.K_LSHIFT] else self.speed
-
-        if not self.turned_right:
-            self.image = pg.transform.flip(self.image, True, False)
-            self.turned_right = True
-
-
-
-    def move_left(self, keys):
-        """ The move_left method is responsible for moving the player to the left, handling sprint and sprite flip.
-            It also updates the last_key_pressed attribute to the key pressed and updates the player's state to walk if it's not already in that state
-
-            Args:
-                - keys (list): A list of the pressed keys
-        """
-        
-        self.last_key_pressed = pg.K_a if keys[pg.K_a] else pg.K_LEFT
-
-        if self.fsm.current != self.walk:
-            self.fsm.update("walk", self)
-            
-        self.rect.x -= 2 * self.speed if keys[pg.K_LSHIFT] else self.speed
-
-        if self.turned_right:
-            self.image = pg.transform.flip(self.image, True, False)
-            self.turned_right = False
-
-
-    def initiate_jump(self):
-        """ The initiate_jump method is responsible for making the player jump if it is on the ground.
-            It also updates the player's state to jump and plays the jump sound effect.
-        """
-        if self.is_on_ground:
-            self.fsm.update("jump", self)
-            self.sound_player.play()
-            self.is_on_ground = False
-            self.velocity_y = -self.jump_speed
+        self.fsm.update()
+        self.apply_gravity()
+        self.move()
 
     def apply_gravity(self):
-        """ The apply_gravity method is responsible for applying gravity to the player, making it fall to the ground"""
- 
-        self.velocity_y += self.gravity
-        self.rect.y += self.velocity_y
+        """
+        Applies gravity to the player.
+        """
+        if not self.is_on_ground:
+            self.rect.y += self.gravity
 
-        # Check if player lands on the ground
-        if self.rect.bottom >= self.ground_level:
-            self.rect.bottom = self.ground_level
-            self.is_on_ground = True
-            self.velocity_y = 0
-            self.fsm.update("fall", self)
-            
+    def move(self):
+        """
+        Moves the player based on input.
+        """
+        keys = pg.key.get_pressed()
+        if keys[pg.K_LEFT]:
+            self.rect.x -= self.speed
+            self.turned_right = False
+        if keys[pg.K_RIGHT]:
+            self.rect.x += self.speed
+            self.turned_right = True
+        if keys[pg.K_SPACE] and self.is_on_ground:
+            self.rect.y -= self.jump_speed
+            self.is_on_ground = False
+            self.sound_player.play()
+
+    def draw(self, window):
+        """
+        Draws the player on the window.
+        
+        :param window: The game window surface.
+        """
+        window.blit(self.image, self.rect)

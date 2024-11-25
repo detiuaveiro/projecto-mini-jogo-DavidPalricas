@@ -6,14 +6,14 @@ from kirby import Kirby
 
 def update_display(all_sprites, window, game_map, player, clock):
     """
-        The update_display function is responsible for updating the display of the game, drawing the game map, and updating the sprites.
+    The update_display function is responsible for updating the display of the game, drawing the game map, and updating the sprites.
 
-        Args:
-            - all_sprites: The group of all the sprites in the game.
-            - window: The game window object.
-            - game_map: The game map object.
-            - player: The player object.
-            - clock: The game clock object used for controlling the frame rate.
+    Args:
+        - all_sprites: The group of all the sprites in the game.
+        - window: The game window object.
+        - game_map: The game map object.
+        - player: The player object.
+        - clock: The game clock object used for controlling the frame rate.
     """
     # Clears the screen
     window.fill((0, 0, 0))  
@@ -21,9 +21,10 @@ def update_display(all_sprites, window, game_map, player, clock):
     # Update camera to center on player
     game_map.update_camera(player)
 
-    # Draw the game map
+    # Draw the game map with camera
     game_map.draw(window)   
 
+    # Update all sprites and draw them on top of the map
     all_sprites.update()
     all_sprites.draw(window)
     
@@ -31,7 +32,7 @@ def update_display(all_sprites, window, game_map, player, clock):
     pg.display.flip()
 
     # Cap the frame rate at 60 FPS
-    clock.tick(60)    
+    clock.tick(60)
 
 def event_handler(running):
     """ The event_handler function is responsible for handling the events in the game, such as quitting the game.
@@ -64,7 +65,7 @@ def game_loop(all_sprites, window, clock, game_map):
 
     running = True
 
-    # The background_music variable is unused  for now, but it will be used in the future.
+    # The background_music variable is unused for now, but it will be used in the future.
     background_music = sp.SoundPlayer("overworld_theme", True).play()
 
     # Get the player object from all_sprites
@@ -78,9 +79,15 @@ def game_loop(all_sprites, window, clock, game_map):
             player.reset_position()
             print("Player fell off the map! Resetting position.")
 
+        # Update camera to follow player
+        game_map.update_camera(player)
+
+        # Draw everything
         update_display(all_sprites, window, game_map, player, clock)
 
     pg.quit()
+
+
 
 def setup_sprites(game_map):
     """ The setup_sprites function creates the games sprites and adds it to the all_sprites group.
@@ -93,8 +100,8 @@ def setup_sprites(game_map):
     """
 
     all_sprites = pg.sprite.Group()
-    grid_size = 40
-    ground_level = 680
+    grid_size = 32
+    ground_level = game_map.map_image.get_height() - grid_size
     player = Player(grid_size, ground_level, game_map) 
     kirby = Kirby(grid_size, ground_level)
     all_sprites.add(player)
@@ -110,7 +117,7 @@ def setup_pygame():
             - clock: The game clock object used for controlling the frame rate.
     """
     pg.init()
-    window = pg.display.set_mode((1020, 720))
+    window = pg.display.set_mode((800, 277))
     pg.display.set_caption("Super Bowser")
     clock = pg.time.Clock()
 
@@ -121,8 +128,9 @@ def main():
     """
     window, clock = setup_pygame()
 
-    window_width, window_height = 1020, 720
+    window_width, window_height = window.get_size()
     game_map = gm.Map(window_width, window_height)
+    camera = game_map.get_camera()
 
     all_sprites = setup_sprites(game_map)  
 
