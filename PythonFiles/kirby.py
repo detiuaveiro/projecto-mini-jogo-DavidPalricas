@@ -5,14 +5,14 @@ import os
 
 class Kirby(Entity):
     
-    def __init__(self, grid_size, ground_level): 
+    def __init__(self, collider): 
         """
             Initializes a new instance of the Kirby class, and calls the constructor of the Entity class (the parent
        """
         
         sprite_path = os.path.join(os.path.dirname(__file__), "../Assets/SpriteSheets/Enemies/Kirby/Idle/Kirby_idle.png")
         
-        super().__init__(sprite_path, grid_size, ground_level)
+        super().__init__(sprite_path, collider)
 
 
         # Set up the kirby's attributes

@@ -2,122 +2,98 @@ import pygame as pg
 import os
 
 class Map:
-    def __init__(self, window_width, window_height, bitmap_relative_path="../Assets/SpriteSheets/Map/overworld_map_colored3.bmp"):
-        """
-        Initializes the Map object, including loading the bitmap and setting up the camera.
-        
-        :param window_width: Width of the game window.
-        :param window_height: Height of the game window.
-        :param bitmap_relative_path: Relative path to the bitmap image file.
-        """
-        self.window_width = window_width
-        self.window_height = window_height
+    """ The Map class is responsible for managing the game map in the game world
 
-        # Construct the absolute path to the bitmap file
-        self.bitmap_path = os.path.join(os.path.dirname(__file__), bitmap_relative_path)
-        
-        # Load the bitmap image as the map background
-        self.map_image = pg.image.load(self.bitmap_path)
-        self.map_rect = self.map_image.get_rect()
-        self.camera = self.map_rect.clip(pg.Rect(0, 0, window_width, window_height))
+        The class has the following attributes:
 
-        self.floor = []
- 
-        self.question_marks = []
+            - tile_set (Surface): The tile set of the game map
+            - FLOOR_TILE_WIDTH (int): The width of the floor tile
+            - FLOOR_TILE_HEIGHT (int): The height of the floor tile
+            - tile_per_row (int): The number of tiles per row
+            - tile_per_col (int): The number of tiles per column
+            - FLOOR_BLOCK (int): The index of the floor block
+            - BRICK_BLOCK (int): The index of the brick block
+            - QUESTION_BLOCK_USED (int): The index of the used question block
+            - QUESTION_BLOCK (int): The index of the question block
+            - map (list): The game map
+            - floor_blocks (list): The list of floor blocks
+            - brick_blocks (list): The list of brick blocks
+            - question_blocks (list): The list of question blocks
+    """
+    def __init__(self) -> None:
+        """ Initializes a new instance of the Map class and sets up the game map atrributes"""
 
-        self.blocks = []
+        tile_set_path = (os.path.join(os.path.dirname(__file__), "../Assets/SpriteSheets/Map/overworld_tileset.png"))
+        self.tile_set = pg.image.load(tile_set_path)
 
-        self.get_floor()
+        self.FLOOR_TILE_WIDTH = 16
+        self.FLOOR_TILE_HEIGHT = 19
 
-        with open("floor.txt", "w") as file:
-            for floor in self.question_marks:
-                file.write(f"{floor}\n")
-    
-    def get_camera(self):
-        """
-        Returns the camera object.
-        
-        :return: The camera object.
-        """
-        return self.camera
-    
-    def get_map_rect(self):
-        """
-        Returns the map rectangle.
-        
-        :return: The map rectangle.
-        """
-        self.map_rect = pg.transform.scale(self.map_image, (self.window_width, self.window_height)).get_rect()
-        return self.map_rect
+        self.tile_per_row = self.tile_set.get_width() // self.FLOOR_TILE_WIDTH
+        self.tile_per_col = self.tile_set.get_height() // self.FLOOR_TILE_HEIGHT
 
-    def update_camera(self, player):
-        """
-        Updates the camera to follow the player.
-        
-        :param player: The player object.
-        """
-        # Set the camera center to the player's position
-        self.camera.center = player.rect.x, self.window_height / 2 
-        
-        # Clamp the camera to the bounds of the map
-        # Ensure that the camera doesn't show empty areas beyond the map
-        self.camera.clamp_ip(self.map_rect)
+        self.FLOOR_BLOCK = 0
+        self.BRICK_BLOCK = 1
+        self.QUESTION_BLOCK_USED = 2
+        self.QUESTION_BLOCK = 3
 
-        # Optional: If the map is smaller than the screen, center the camera
-        if self.map_rect.width < self.window_width:
-            self.camera.centerx = self.map_rect.centerx
-        if self.map_rect.height < self.window_height:
-            self.camera.centery = self.map_rect.centery
+        self.map = [[],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [],
+                    [None] * 22 + [self.BRICK_BLOCK] * 3 + [None],
+                    [None] * 5  + [self.BRICK_BLOCK,self.QUESTION_BLOCK,self.BRICK_BLOCK] ,
+                    [None] * 17 + [self.BRICK_BLOCK]*2 + [self.QUESTION_BLOCK,self.BRICK_BLOCK],
+                    [],
+                    [],
+                    [self.FLOOR_BLOCK] * 31,
+        ]
 
-    def draw(self, window):
-        """
-        Draws the visible part of the map to the window.
-        
-        :param window: The game window surface.
-        """
-        # Blit the map image relative to the camera (this ensures the camera follows the player)
-        window.blit(self.map_image, (0, 0), self.camera)
-
-
-    def get_floor(self):
-        self.colors = []
-        for y in range(self.window_height):
-            for x in range(self.window_width):
-
-                pixel = self.map_image.get_at((x,y))    
-                if pixel[: 3] not in self.colors:
-                    self.colors.append(pixel[: 3])
-
-                self.test(pixel, (x, y))    
-
-        with open("colors.txt", "w") as file:
-            for color in self.colors:
-                file.write(f"{color}\n")
-
-    def test(self, pixel,coordinates):
-        # Red Color
-        FLOOR_COLOR = (255, 0, 0)
-
-        QUESTION_MARK_COLOR = (163, 73, 164)
-
-        BLOCK_COLOR = (63 , 72 , 204)
-        
-        # Ignore the alpha channel
-        pixel_color = pixel[: 3]
-
-
-        if pixel_color == FLOOR_COLOR:
-            self.floor.append(pg.Rect(coordinates[0], coordinates[1], 1, 1))
-        elif pixel_color == QUESTION_MARK_COLOR:
-            self.question_marks.append(pg.Rect(coordinates[0], coordinates[1], 1, 1))
-        elif pixel_color == BLOCK_COLOR:
-            self.blocks.append(pg.Rect(coordinates[0], coordinates[1], 1, 1))
-
-        
+        self.floor_blocks = []
+        self.brick_blocks = []
+        self.question_blocks = []
 
     
-           
-           
-                
+    def draw(self,window):
+        """ The draw method is responsible for drawing the game map on the screen  
+                Args:
+                    - window (Surface): The game window object
+        """
+        for row_index,row in enumerate(self.map):
+            for col_index, tile_index in enumerate(row):
+                if tile_index is None:
+                    continue
+                tile_image = self.get_tile_image(self.tile_set,tile_index,(col_index,row_index))
+                window.blit(tile_image,(col_index * self.FLOOR_TILE_WIDTH, row_index * self.FLOOR_TILE_HEIGHT))
 
+    def get_tile_image(self,tile_set,tile_index, map_index):
+        """ The get_tile_image method is responsible for getting the tile image from the tile set and setting up the blocks colliders
+             
+             Args:
+                 - tile_set (Surface): The tile set of the game map
+                 - tile_index (int): The index of the tile in the tile set
+                 - map_index (tuple): The index of the tile in the game map
+             
+             Returns:
+                 - Surface: The tile image from the tile set
+        """
+        row, column = tile_index // self.tile_per_row, tile_index % self.tile_per_row
+        block_width, block_height = (self.FLOOR_TILE_WIDTH, self.FLOOR_TILE_HEIGHT) if tile_index == self.FLOOR_BLOCK else (17, 19)
+       
+        x, y = column * block_width, row * block_height
+                  
+        block_collider = pg.Rect(map_index[0] * self.FLOOR_TILE_WIDTH ,map_index[1] * self.FLOOR_TILE_HEIGHT, block_width, block_height)
+          
+        if tile_index == self.BRICK_BLOCK:
+            self.brick_blocks.append((block_collider,map_index))
+        elif tile_index == self.QUESTION_BLOCK:
+            self.question_blocks.append((block_collider, map_index))
+        else:
+            self.floor_blocks.append((block_collider, map_index))
 
+        return tile_set.subsurface((x, y, self.FLOOR_TILE_WIDTH, self.FLOOR_TILE_HEIGHT))  

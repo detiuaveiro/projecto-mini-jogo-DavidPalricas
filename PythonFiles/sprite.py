@@ -11,18 +11,18 @@ class Sprite:
             - remove_internal: The remove_internal method of the sprite group
     """
 
-    def __init__(self,sprite_path,coordinates): 
+    def __init__(self,sprite_path,collider): 
         """ 
             Initializes a new instance of the Sprite class, loads the sprite image file , sets the dimensions of the sprite, and creates a rectangle for the sprite
 
             Args:
                 - sprite_path (str): The path to the sprite image file
-                - coordinates (tuple): The coordinates of the sprite
+                - collider (tuple): The collider of the sprite
         """   
 
         self.image = pg.image.load(sprite_path).convert_alpha()
         self.dimensions = (self.image.get_width(), self.image.get_height())
-        self.rect = pgs.Rect(coordinates)
+        self.rect = pgs.Rect(collider)
         
         # The add_internal and remove_internal methods are implemented to be possible for add and remove instance of the Sprite class from the sprite group define in the game.py
         self.add_internal = pgs.Group.add
