@@ -116,31 +116,50 @@ class Jump(State):
     
 
 class FSM:
-    def __init__(self, states, transitions):
+    """The FSM class is responsible for managing the finite state machine of the entity
+
+       The class has the following attributes:
+            - states: The states of the entity (e.g. idle, walk, jump)
+            - transitions: The transitions between the entity's states
+            - current: The current state of the entity
+            - end: The end state of the entity
+    """
+    def __init__(self, states: list[State], transitions: dict[Transition]) -> None:
         """
-        Initializes the FSM with states and transitions.
-        
-        :param states: A dictionary of states.
-        :param transitions: A dictionary of transitions.
+            Initializes a new instance of the FSM class
+            
+            Args:
+                - states (list): A list of the states of the entity
+                - transitions (dict): A dictionary of the transitions between the entity's states
         """
+
         self._states = states
         self._transitions = transitions
-        self.current = list(states.values())[0]  # Set the initial state to the first state in the dictionary
+        self.current: State = self._states[0]
+        self.end: State = self._states[-1]
 
-    def update(self):
+    def update(self, event, object):
         """
-        Updates the current state.
-        """
-        self.current()
+            The update method is responsible for updating the state of the entity based on the event
 
-    def transition(self, transition_name):
+            Args:
+                - event (str): The event that triggers the state transition
+                - object (Entity): The entity that the state belongs to
+
+            Returns:
+                - bool: A flag indicating whether the entity has reached the end state
         """
-        Transitions to a new state based on the transition name.
-        
-        :param transition_name: The name of the transition.
-        """
-        if transition_name in self._transitions:
-            from_state, to_state = self._transitions[transition_name]
-            if self.current == self._states[from_state]:
-                self.current = self._states[to_state]
+
+        if event:
+            trans = self._transitions.get(event)
+            if trans and trans._from == self.current:
+                self.current.exit()
+                self.current = trans._to
+                self.current.enter()
+        self.current.update(object)
+
+        if self.current == self.end:
+            self.current.exit()
+            return False
+        return True
     

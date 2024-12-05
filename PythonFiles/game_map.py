@@ -2,7 +2,7 @@ import pygame as pg
 import os
 
 class Map:
-    def __init__(self, window_width, window_height, bitmap_relative_path="../Assets/SpriteSheets/Map/overworld_map.bmp"):
+    def __init__(self, window_width, window_height, bitmap_relative_path="../Assets/SpriteSheets/Map/overworld_map_colored3.bmp"):
         """
         Initializes the Map object, including loading the bitmap and setting up the camera.
         
@@ -20,7 +20,19 @@ class Map:
         self.map_image = pg.image.load(self.bitmap_path)
         self.map_rect = self.map_image.get_rect()
         self.camera = self.map_rect.clip(pg.Rect(0, 0, window_width, window_height))
-        
+
+        self.floor = []
+ 
+        self.question_marks = []
+
+        self.blocks = []
+
+        self.get_floor()
+
+        with open("floor.txt", "w") as file:
+            for floor in self.question_marks:
+                file.write(f"{floor}\n")
+    
     def get_camera(self):
         """
         Returns the camera object.
@@ -65,3 +77,47 @@ class Map:
         """
         # Blit the map image relative to the camera (this ensures the camera follows the player)
         window.blit(self.map_image, (0, 0), self.camera)
+
+
+    def get_floor(self):
+        self.colors = []
+        for y in range(self.window_height):
+            for x in range(self.window_width):
+
+                pixel = self.map_image.get_at((x,y))    
+                if pixel[: 3] not in self.colors:
+                    self.colors.append(pixel[: 3])
+
+                self.test(pixel, (x, y))    
+
+        with open("colors.txt", "w") as file:
+            for color in self.colors:
+                file.write(f"{color}\n")
+
+    def test(self, pixel,coordinates):
+        # Red Color
+        FLOOR_COLOR = (255, 0, 0)
+
+        QUESTION_MARK_COLOR = (163, 73, 164)
+
+        BLOCK_COLOR = (63 , 72 , 204)
+        
+        # Ignore the alpha channel
+        pixel_color = pixel[: 3]
+
+
+        if pixel_color == FLOOR_COLOR:
+            self.floor.append(pg.Rect(coordinates[0], coordinates[1], 1, 1))
+        elif pixel_color == QUESTION_MARK_COLOR:
+            self.question_marks.append(pg.Rect(coordinates[0], coordinates[1], 1, 1))
+        elif pixel_color == BLOCK_COLOR:
+            self.blocks.append(pg.Rect(coordinates[0], coordinates[1], 1, 1))
+
+        
+
+    
+           
+           
+                
+
+
