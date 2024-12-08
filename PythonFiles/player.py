@@ -2,6 +2,8 @@ import pygame as pg
 from entity import Entity
 import finite_state_machine as fsm
 import os
+from inputHandler import InputHandler  # Import the InputHandler class
+from command import MoveRightCommand, MoveLeftCommand, JumpCommand, SprintCommand
 
 class Player(Entity):
     """
@@ -29,9 +31,8 @@ class Player(Entity):
         self.head_collider = pg.Rect((self.rect.x + 20, self.rect.y - 20, 5, 20))
         # Set up the player's attributes
         self.jump_speed = 15  
-        self.last_key_pressed = None
 
-        # Set up the atrributes inherited from the Entity class
+        # Set up the attributes inherited from the Entity class
         self.speed = 1.8
         self.gravity = 1
         self.is_on_ground = True
@@ -40,6 +41,17 @@ class Player(Entity):
 
         # Initialize FSM and states
         self.fsm = fsm.FSM(self.set_states(), self.set_transitions())
+
+        # Initialize InputHandler
+        self.input_handler = InputHandler()
+        self.input_handler.set_command(pg.K_SPACE, JumpCommand())
+        self.input_handler.set_command(pg.K_UP, JumpCommand())
+        self.input_handler.set_command(pg.K_w, JumpCommand())
+        self.input_handler.set_command(pg.K_RIGHT, MoveRightCommand())
+        self.input_handler.set_command(pg.K_d, MoveRightCommand())
+        self.input_handler.set_command(pg.K_a, MoveLeftCommand())
+        self.input_handler.set_command(pg.K_LEFT, MoveLeftCommand())
+        self.input_handler.set_command(pg.K_LSHIFT, SprintCommand())
 
     def set_states(self):
         """ The set_states method is responsible for setting the states of the player e.g. (idle, walk, jump)
@@ -81,70 +93,53 @@ class Player(Entity):
 
         self.head_collider = pg.Rect((self.rect.x + 20, self.rect.y, 10, 10)) if self.turned_right else pg.Rect((self.rect.x, self.rect.y, 10, 10)) 
 
-   
-
-
     def move(self, keys):
-        """ The move method is responsible for moving the player based on the pressed keys and sets the player idle if the previous movement key is  released
-            If the player presses the space key, W key, or UP key, the initiate_jump method is called to make the player jump
-            If the player presses the D key or RIGHT key, the move_right method is called to move the player to the right
-            If the player presses the A key or LEFT key, the move_left method is called to move the player to the left
+        """ The move method is responsible for moving the player based on the pressed keys and sets the player idle if no movement key is pressed.
+            If the player presses the space key, W key, or UP key, the initiate_jump method is called to make the player jump.
+            If the player presses the D key or RIGHT key, the move_right method is called to move the player to the right.
+            If the player presses the A key or LEFT key, the move_left method is called to move the player to the left.
 
             Args:
                 - keys (list): A list of the pressed keys
         """
+        handled_movement = False
 
-        if keys[pg.K_SPACE] or keys[pg.K_UP] or keys[pg.K_w]:
-            self.initiate_jump()
-        elif keys[pg.K_d] or keys[pg.K_RIGHT]:
-            self.move_right(keys)
-        elif keys[pg.K_a] or keys[pg.K_LEFT]:
-            self.move_left(keys)
-            
-            # Transition to idle state if no horizontal movement key is pressed
-        if self.last_key_pressed and not keys[self.last_key_pressed]:
+        for key in range(len(keys)):
+            if keys[key]:
+                command = self.input_handler.handle_input(key)
+                if command:
+                    command.execute(self)
+                    handled_movement = True
+
+        # Transition to idle state if no movement key is pressed
+        if not handled_movement:
             self.fsm.update("idle", self)
-            self.last_key_pressed = None
-       
-    def move_right(self, keys):
+
+    def move_right(self):
         """ The move_right method is responsible for moving the player to the right, handling sprint and sprite flip.
-            It also updates the last_key_pressed attribute to the key pressed and updates the player's state to walk if it's not already in that state
-
-            Args:
-             - keys (list): A list of the pressed keys
+            It also updates the player's state to walk if it's not already in that state.
         """
-        
-        self.last_key_pressed = pg.K_d if keys[pg.K_d] else pg.K_RIGHT
-
         if self.fsm.current != self.walk:
             self.fsm.update("walk", self)
 
-        self.rect.x += 2 * self.speed if keys[pg.K_LSHIFT] else self.speed
+        self.rect.x += 2 * self.speed if pg.key.get_pressed()[pg.K_LSHIFT] else self.speed
 
         if not self.turned_right:
             self.image = pg.transform.flip(self.image, True, False)
             self.turned_right = True
 
-
-    def move_left(self, keys):
+    def move_left(self):
         """ The move_left method is responsible for moving the player to the left, handling sprint and sprite flip.
-            It also updates the last_key_pressed attribute to the key pressed and updates the player's state to walk if it's not already in that state
-
-            Args:
-                - keys (list): A list of the pressed keys
+            It also updates the player's state to walk if it's not already in that state.
         """
-        
-        self.last_key_pressed = pg.K_a if keys[pg.K_a] else pg.K_LEFT
-
         if self.fsm.current != self.walk:
             self.fsm.update("walk", self)
             
-        self.rect.x -= 2 * self.speed if keys[pg.K_LSHIFT] else self.speed
+        self.rect.x -= 2 * self.speed if pg.key.get_pressed()[pg.K_LSHIFT] else self.speed
 
         if self.turned_right:
             self.image = pg.transform.flip(self.image, True, False)
             self.turned_right = False
-
 
     def initiate_jump(self):
         """ The initiate_jump method is responsible for making the player jump if it is on the ground.
@@ -156,7 +151,17 @@ class Player(Entity):
             self.is_on_ground = False
             self.velocity_y = -self.jump_speed
 
-
+    def sprint(self):
+        """ The sprint method is responsible for making the player sprint if the player is walking.
+            It also updates the player's state to walk.
+        """
+        if self.fsm.current == self.walk:
+            self.fsm.update("walk", self)
+            self.speed = 3.5
+            self.jump_speed = 20
+        else:
+            self.speed = 1.8
+            self.jump_speed = 15
      
     def apply_gravity(self):
         """ The apply_gravity method is responsible for applying gravity to the player, making it fall to the ground"""

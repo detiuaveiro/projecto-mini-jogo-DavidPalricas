@@ -10,8 +10,8 @@
  <hr>
  
   # Controls
- |Keys         | Move Right| Move Left| Jump   | Sprint |
- |:-----------:| :--------:| :-------:|:------:|:------:|
- |WASD Keys    |     `D`   |    `A`   |  `W`   |        |
- | Arrow Keys  |  `Right`  |    `Left`|  `Up`  |        | 
- | Other Keys  |           |          | `Space`|`LShift`|
+ |Keys         |Move Right| Move Left|  Jump   | Sprint |
+ |:-----------:|:--------:|:--------:|:-------:|:------:|
+ | WASD Keys   |   `D`    |   `A`    |   `W`   |        |
+ | Arrow Keys  | `Right`  |  `Left`  |   `Up`  |        | 
+ | Other Keys  |          |          | `Space` |`LShift`|
