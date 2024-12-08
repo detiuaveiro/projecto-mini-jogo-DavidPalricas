@@ -1,5 +1,6 @@
 import pygame as pg
 import sound_player as sp
+import kirby as Kirby
 import os
 
 class Observer:
@@ -16,7 +17,7 @@ class Observer:
          - time (int): The time left in the game.
          - font (Font): The font object used for rendering the text on the screen
  """
- def __init__(self,player,game_map) -> None:
+ def __init__(self,player,game_map, kirby) -> None:
     """ Initializes a new instance of the Score class and sets up the attributes of the class.
 
          Args:
@@ -25,6 +26,7 @@ class Observer:
     """
     self.player = player
     self.game_map = game_map
+    self.kirby = kirby
 
     self.music_player = sp.SoundPlayer(True)
     self.music_player.play("overworld_theme")
@@ -53,40 +55,47 @@ class Observer:
 
 
  def check_collisions(self):
-    """ The check_collision function checks if the player has collided with any of the blocks in the game map.
+   """ The check_collision function checks if the player has collided with any of the blocks in the game map.
 
-        For now this method only checks if the player has collided with the brick blocks and question blocks in the game map, when the player is below the block.
-         If the player has collided with a brick block, it breaks the block and adds 50 points to the player's score.
-         If the player has collided with a question block, it replaces the block with a used question block.
-    """
+      For now this method only checks if the player has collided with the brick blocks and question blocks in the game map, when the player is below the block.
+      If the player has collided with a brick block, it breaks the block and adds 50 points to the player's score.
+      If the player has collided with a question block, it replaces the block with a used question block.
+   """
 
-    brick_blocks_colliders = [block[0] for block in self.game_map.brick_blocks]
+   brick_blocks_colliders = [block[0] for block in self.game_map.brick_blocks]
 
-    question_blocks_colliders = [block[0] for block in self.game_map.question_blocks]
+   question_blocks_colliders = [block[0] for block in self.game_map.question_blocks]
 
-    player_head_collider = self.player.head_collider
+   player_head_collider = self.player.head_collider
    
-    # Check if the player has collided with a brick block
-    if player_head_collider.collidelist(brick_blocks_colliders) != -1:
-        block_index = self.player.rect.collidelist(brick_blocks_colliders)
-        block = brick_blocks_colliders[block_index]
+   # Check if the player has collided with a brick block
+   if player_head_collider.collidelist(brick_blocks_colliders) != -1:
+      block_index = self.player.rect.collidelist(brick_blocks_colliders)
+      block = brick_blocks_colliders[block_index]
    
-        if self.player.head_collider.y > block.y:
-            self.sound_effecter.play("break_block")
-            self.game_map.brick_blocks = [b for b in self.game_map.brick_blocks if b[0] != block]
+      if self.player.head_collider.y > block.y:
+         self.sound_effecter.play("break_block")
+         self.game_map.brick_blocks = [b for b in self.game_map.brick_blocks if b[0] != block]
 
-            self.game_map.map[block[1] // 19][block[0] // 16] = None
-            self.score += 50
+         self.game_map.map[block[1] // 19][block[0] // 16] = None
+         self.score += 50
     
-    # Check if the player has collided with a question block
-    if player_head_collider.collidelist(question_blocks_colliders) != -1:
-        block_index = self.player.rect.collidelist(question_blocks_colliders)
-        block = question_blocks_colliders[block_index]
+   # Check if the player has collided with a question block
+   if player_head_collider.collidelist(question_blocks_colliders) != -1:
+      block_index = self.player.rect.collidelist(question_blocks_colliders)
+      block = question_blocks_colliders[block_index]
 
-        if self.player.head_collider.y > block.y:
-            self.game_map.question_blocks = [b for b in self.game_map.question_blocks if b[0] != block]
+      if self.player.head_collider.y > block.y:
+         self.game_map.question_blocks = [b for b in self.game_map.question_blocks if b[0] != block]
 
-            self.game_map.map[block[1] // 19][block[0] // 16] = self.game_map.QUESTION_BLOCK_USED
+         self.game_map.map[block[1] // 19][block[0] // 16] = self.game_map.QUESTION_BLOCK_USED
+            
+   # Check if the player has collided with the kirby
+   kirby_collider = self.kirby.kirby_collider()
+   if self.player.rect.colliderect(kirby_collider):
+      self.player.rect.x = 0
+      self.player.rect.y = 235
+      self.score -= 100
 
  def draw_score_label(self,window):
     """ The draw_score_label function is responsible for drawing the score label on the screen.

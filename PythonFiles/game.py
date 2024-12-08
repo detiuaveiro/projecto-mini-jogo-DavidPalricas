@@ -34,7 +34,11 @@ def update_display(all_sprites, window, game_map,observer, game_time):
     player = next(sprite for sprite in all_sprites if isinstance(sprite, Player))
 
     pg.draw.rect(window,(255, 0, 0), player.head_collider)
-
+    pg.draw.rect(window,(255, 0, 0), player.rect)
+    
+    kirby = next(sprite for sprite in all_sprites if isinstance(sprite, Kirby))
+    
+    pg.draw.rect(window,(255, 0, 0), kirby.kirby_collider())
     
     # Update all sprites and draw them on top of the map
     all_sprites.update()
@@ -77,15 +81,16 @@ def game_loop(all_sprites, window, clock, game_map):
     running = True
 
     # Get the player object from all_sprites
-    player = next(sprite for sprite in all_sprites if isinstance(sprite, Player))  
+    player = next(sprite for sprite in all_sprites if isinstance(sprite, Player)) 
+    kirby = next(sprite for sprite in all_sprites if isinstance(sprite, Kirby))
  
-    observer = Observer(player, game_map)
+    observer = Observer(player, game_map, kirby)
     
     game_time = 0
 
     while running:
         running = event_handler(running)
-
+        
         # Reset game if player falls off the map
         if player.rect.bottom > 600:
             player.reset_position()
@@ -117,7 +122,7 @@ def setup_sprites():
 
     all_sprites = pg.sprite.Group()
 
-    player = Player((0,235, 80,40)) 
+    player = Player((0,235,32,32)) 
     all_sprites.add(player)
 
     kirby = Kirby((150, 252 , 20, 30))

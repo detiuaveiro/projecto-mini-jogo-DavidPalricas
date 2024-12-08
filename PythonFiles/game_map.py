@@ -96,4 +96,4 @@ class Map:
         else:
             self.floor_blocks.append((block_collider, map_index))
 
-        return tile_set.subsurface((x, y, self.FLOOR_TILE_WIDTH, self.FLOOR_TILE_HEIGHT))  
+        return tile_set.subsurface((x, y, self.FLOOR_TILE_WIDTH, self.FLOOR_TILE_HEIGHT)) 

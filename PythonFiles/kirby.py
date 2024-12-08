@@ -82,4 +82,10 @@ class Kirby(Entity):
                 self.image = pg.transform.flip(self.image, False, False)
                 
             self.fsm.update("idle", self)
-        
+            
+    def kirby_collider(self):
+        """ The kirby_collider method is responsible for creating a collider for the kirby
+            Returns:
+                - Rect: The kirby's collider
+        """
+        return pg.Rect(self.rect.x, self.rect.y, 16, 16)
