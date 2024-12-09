@@ -32,20 +32,16 @@ def update_display(all_sprites, window, game_map,observer, game_time):
     observer.draw_ui_labels(window,game_time)
 
    
-
-
-    
-
     player = next(sprite for sprite in all_sprites if isinstance(sprite, Player))
 
-    pg.draw.rect(window,(255, 0, 0), player.head_collider)
-    #pg.draw.rect(window,(0, 0, 255), player.rect)
 
+    #pg.draw.rect(window,(255, 0, 0), player.head_collider)
+    pg.draw.rect(window,(0, 0, 255), player.rect)
 
     
-    kirby = next(sprite for sprite in all_sprites if isinstance(sprite, Kirby))
+    #kirby = next(sprite for sprite in all_sprites if isinstance(sprite, Kirby))
     
-    pg.draw.rect(window,(255, 0, 0), kirby.kirby_collider())
+    #pg.draw.rect(window,(255, 0, 0), kirby.kirby_collider())
     
     # Update all sprites and draw them on top of the map
     all_sprites.update()
@@ -90,8 +86,11 @@ def game_loop(all_sprites, window, clock, game_map):
     # Get the player object from all_sprites
     player = next(sprite for sprite in all_sprites if isinstance(sprite, Player)) 
     kirby = next(sprite for sprite in all_sprites if isinstance(sprite, Kirby))
+
+
+    enemies = [kirby]   
  
-    observer = Observer(player, game_map, kirby)
+    observer = Observer(player, game_map, enemies)
     
     game_time = 0
 
@@ -102,6 +101,14 @@ def game_loop(all_sprites, window, clock, game_map):
         # Update camera to follow player
         #sgame_map.update_camera(player)
 
+        
+        if len(enemies) > 0:
+            for enemy in enemies:
+                if enemy.dead:
+                    observer.enemies = [enemies for enemies in observer.enemies if enemies.dead == False]
+                    enemies.remove(enemy)
+                    all_sprites.remove(enemy)
+        
 
         game_time += clock.tick(60)
 
@@ -125,10 +132,10 @@ def setup_sprites():
 
     all_sprites = pg.sprite.Group()
 
-    player = Player((0,235,32,32)) 
+    player = Player((0,235,25,31)) 
     all_sprites.add(player)
 
-    kirby = Kirby((150, 252 , 20, 30))
+    kirby = Kirby((150, 252 , 18, 20))
     all_sprites.add(kirby)
 
     return all_sprites

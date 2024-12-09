@@ -16,7 +16,7 @@ class Observer:
          - time (int): The time left in the game.
          - font (Font): The font object used for rendering the text on the screen
  """
- def __init__(self,player,game_map, kirby) -> None:
+ def __init__(self,player,game_map,enemies) -> None:
     """ Initializes a new instance of the Score class and sets up the attributes of the class.
 
          Args:
@@ -25,7 +25,8 @@ class Observer:
     """
     self.player = player
     self.game_map = game_map
-    self.kirby = kirby
+    self.enemies = enemies
+
 
     self.music_player = sp.SoundPlayer(True)
     self.music_player.play("overworld_theme")
@@ -61,8 +62,6 @@ class Observer:
       If the player has collided with a question block, it replaces the block with a used question block.
    """
 
-
-
    brick_blocks_colliders =  self.game_map.brick_blocks_colliders
 
    question_blocks_colliders = self.game_map.question_blocks_colliders
@@ -75,7 +74,8 @@ class Observer:
       block_index = self.player.rect.collidelist(brick_blocks_colliders)
       block = brick_blocks_colliders[block_index]
    
-      if self.player.rect.bottom > block.top and self.player.rect.top < block.top:
+      if self.player.rect.top < block.top and self.player.rect.bottom > block.bottom:
+
          self.sound_effecter.play("break_block")
          
          self.game_map.brick_blocks_colliders = [block for block in brick_blocks_colliders if block != block]
@@ -83,41 +83,64 @@ class Observer:
          self.game_map.map[block[1] // 19][block[0] // 16] = None
          self.score += 50
 
+      elif self.player.rect.top < block.top:
+         self.player.bottom = block.top
+         self.player.is_on_ground = True
+
    
     
    # Check if the player has collided with a question block
    if self.player.rect.collidelist(question_blocks_colliders) != -1:
       block_index = self.player.rect.collidelist(question_blocks_colliders)
       block = question_blocks_colliders[block_index]
-
-         
-      if self.player.rect.bottom > block.top and self.player.rect.top < block.top:
-
-         self.game_map.question_blocks_used_colliders.append(block)
-
-         self.game_map.map[block[1] // 19][block[0] // 16] = self.game_map.QUESTION_BLOCK_USED
-       
+    
+      if self.player.rect.top < block.top and self.player.rect.bottom > block.bottom:
+          
          self.game_map.question_blocks_colliders = [block for block in question_blocks_colliders if block != block]
 
-         
+         #self.game_map.map[block[1] // 19][block[0] // 16] = self.game_map.QUESTION_BLOCK_USED
+
+      elif self.player.rect.top < block.top:
+         self.player.bottom = block.top
+         self.player.is_on_ground = True
+   
 
    if self.player.rect.collidelist(floor_blocks_colliders) != -1:
       block_index = self.player.rect.collidelist(floor_blocks_colliders)
 
-      self.player.rect.y = floor_blocks_colliders[block_index].y 
+      self.player.rect.y = floor_blocks_colliders[block_index].top - self.player.rect.height
        
-      self.player.rect.y = floor_blocks_colliders[block_index].y - self.player.rect.height
       self.player.is_on_ground = True
-    
 
-     
-            
-   # Check if the player has collided with the kirby
-   kirby_collider = self.kirby.kirby_collider()
-   if self.player.rect.colliderect(kirby_collider):
-      self.player.rect.x = 0
-      self.player.rect.y = 235
-      self.score -= 100
+
+   if self.player.rect.collidelist(self.game_map.question_blocks_used_colliders) != -1:
+      block_index = self.player.rect.collidelist(question_blocks_colliders)
+      block = question_blocks_colliders[block_index]
+
+      if self.player.rect.top < block.top and self.player.rect.bottom > block.bottom:
+         print("hit used block")
+
+      elif self.player.rect.top < block.top:
+         self.player.bottom = block.top
+         self.player.is_on_ground = True
+   
+    
+   
+   enemies_colliders = [enemy.rect for enemy in self.enemies]
+   if self.player.rect.collidelist(enemies_colliders) != -1:
+
+      enemy = self.enemies[self.player.rect.collidelist(enemies_colliders)]
+
+      kirby_collider = enemies_colliders[self.player.rect.collidelist(enemies_colliders)]
+
+
+      if self.player.rect.bottom >= kirby_collider.top and  not self.player.is_on_ground:
+         enemy.dead = True
+
+      else:
+         self.player.rect.x = 0
+         self.player.rect.y = 235
+         self.score -= 100
 
  def draw_score_label(self,window):
     """ The draw_score_label function is responsible for drawing the score label on the screen.
