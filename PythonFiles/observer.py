@@ -1,6 +1,5 @@
 import pygame as pg
 import sound_player as sp
-import kirby as Kirby
 import os
 
 class Observer:
@@ -36,7 +35,7 @@ class Observer:
     self.player_sound_effecter = sp.SoundPlayer(False)
 
     self.score = 0
-    self.time = 95
+    self.time = 300
      
     font_path = os.path.join(os.path.dirname(__file__), "../Assets/Font/mario_nes.ttf")
     self.font = pg.font.Font(font_path, 12)
@@ -62,33 +61,56 @@ class Observer:
       If the player has collided with a question block, it replaces the block with a used question block.
    """
 
-   brick_blocks_colliders = [block[0] for block in self.game_map.brick_blocks]
 
-   question_blocks_colliders = [block[0] for block in self.game_map.question_blocks]
 
-   player_head_collider = self.player.head_collider
+   brick_blocks_colliders =  self.game_map.brick_blocks_colliders
+
+   question_blocks_colliders = self.game_map.question_blocks_colliders
+
+   floor_blocks_colliders = self.game_map.floor_blocks_colliders
+
    
    # Check if the player has collided with a brick block
-   if player_head_collider.collidelist(brick_blocks_colliders) != -1:
+   if self.player.rect.collidelist(brick_blocks_colliders) != -1:
       block_index = self.player.rect.collidelist(brick_blocks_colliders)
       block = brick_blocks_colliders[block_index]
    
-      if self.player.head_collider.y > block.y:
+      if self.player.rect.bottom > block.top and self.player.rect.top < block.top:
          self.sound_effecter.play("break_block")
-         self.game_map.brick_blocks = [b for b in self.game_map.brick_blocks if b[0] != block]
+         
+         self.game_map.brick_blocks_colliders = [block for block in brick_blocks_colliders if block != block]
 
          self.game_map.map[block[1] // 19][block[0] // 16] = None
          self.score += 50
+
+   
     
    # Check if the player has collided with a question block
-   if player_head_collider.collidelist(question_blocks_colliders) != -1:
+   if self.player.rect.collidelist(question_blocks_colliders) != -1:
       block_index = self.player.rect.collidelist(question_blocks_colliders)
       block = question_blocks_colliders[block_index]
 
-      if self.player.head_collider.y > block.y:
-         self.game_map.question_blocks = [b for b in self.game_map.question_blocks if b[0] != block]
+         
+      if self.player.rect.bottom > block.top and self.player.rect.top < block.top:
+
+         self.game_map.question_blocks_used_colliders.append(block)
 
          self.game_map.map[block[1] // 19][block[0] // 16] = self.game_map.QUESTION_BLOCK_USED
+       
+         self.game_map.question_blocks_colliders = [block for block in question_blocks_colliders if block != block]
+
+         
+
+   if self.player.rect.collidelist(floor_blocks_colliders) != -1:
+      block_index = self.player.rect.collidelist(floor_blocks_colliders)
+
+      self.player.rect.y = floor_blocks_colliders[block_index].y 
+       
+      self.player.rect.y = floor_blocks_colliders[block_index].y - self.player.rect.height
+      self.player.is_on_ground = True
+    
+
+     
             
    # Check if the player has collided with the kirby
    kirby_collider = self.kirby.kirby_collider()

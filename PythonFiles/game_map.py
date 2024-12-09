@@ -54,9 +54,10 @@ class Map:
                     [self.FLOOR_BLOCK] * 31,
         ]
 
-        self.floor_blocks = []
-        self.brick_blocks = []
-        self.question_blocks = []
+        self.floor_blocks_colliders = []
+        self.brick_blocks_colliders = []
+        self.question_blocks_colliders = []
+        self.question_blocks_used_colliders = []
 
     
     def draw(self,window):
@@ -83,17 +84,17 @@ class Map:
                  - Surface: The tile image from the tile set
         """
         row, column = tile_index // self.tile_per_row, tile_index % self.tile_per_row
-        block_width, block_height = (self.FLOOR_TILE_WIDTH, self.FLOOR_TILE_HEIGHT) if tile_index == self.FLOOR_BLOCK else (17, 19)
+        block_width, block_height = (self.FLOOR_TILE_WIDTH - 2 , self.FLOOR_TILE_HEIGHT) if tile_index == self.FLOOR_BLOCK else (17, 19)
        
         x, y = column * block_width, row * block_height
                   
-        block_collider = pg.Rect(map_index[0] * self.FLOOR_TILE_WIDTH ,map_index[1] * self.FLOOR_TILE_HEIGHT, block_width, block_height)
+        block_collider = pg.Rect(map_index[0] * self.FLOOR_TILE_WIDTH , map_index[1] * self.FLOOR_TILE_HEIGHT, block_width, block_height) 
           
         if tile_index == self.BRICK_BLOCK:
-            self.brick_blocks.append((block_collider,map_index))
+            self.brick_blocks_colliders.append(block_collider)
         elif tile_index == self.QUESTION_BLOCK:
-            self.question_blocks.append((block_collider, map_index))
+            self.question_blocks_colliders.append(block_collider)
         else:
-            self.floor_blocks.append((block_collider, map_index))
+            self.floor_blocks_colliders.append(block_collider)
 
         return tile_set.subsurface((x, y, self.FLOOR_TILE_WIDTH, self.FLOOR_TILE_HEIGHT)) 

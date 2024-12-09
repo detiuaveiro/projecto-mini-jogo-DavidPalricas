@@ -31,10 +31,17 @@ def update_display(all_sprites, window, game_map,observer, game_time):
 
     observer.draw_ui_labels(window,game_time)
 
+   
+
+
+    
+
     player = next(sprite for sprite in all_sprites if isinstance(sprite, Player))
 
     pg.draw.rect(window,(255, 0, 0), player.head_collider)
-    pg.draw.rect(window,(255, 0, 0), player.rect)
+    #pg.draw.rect(window,(0, 0, 255), player.rect)
+
+
     
     kirby = next(sprite for sprite in all_sprites if isinstance(sprite, Kirby))
     
@@ -91,11 +98,7 @@ def game_loop(all_sprites, window, clock, game_map):
     while running:
         running = event_handler(running)
         
-        # Reset game if player falls off the map
-        if player.rect.bottom > 600:
-            player.reset_position()
-            print("Player fell off the map! Resetting position.")
-
+   
         # Update camera to follow player
         #sgame_map.update_camera(player)
 

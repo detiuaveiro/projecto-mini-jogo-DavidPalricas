@@ -28,13 +28,13 @@ class Player(Entity):
         sprite_path = os.path.join(os.path.dirname(__file__), "../Assets/SpriteSheets/Bowser/Idle/bowser_idle.png")
         super().__init__(sprite_path, collider)
          
-        self.head_collider = pg.Rect((self.rect.x + 20, self.rect.y - 20, 5, 20))
+        self.head_collider = pg.Rect((self.rect.x + 20, self.rect.y, 5, 5))
         # Set up the player's attributes
-        self.jump_speed = 15  
+        self.jump_speed = 10
 
         # Set up the attributes inherited from the Entity class
         self.speed = 1.8
-        self.gravity = 1
+        self.gravity = 0.8
         self.is_on_ground = True
         self.turned_right = True
         self.name = "Bowser"
@@ -91,7 +91,7 @@ class Player(Entity):
         self.animator.play_animation(self.fsm.current.name, self )
 
 
-        self.head_collider = pg.Rect((self.rect.x + 20, self.rect.y, 10, 10)) if self.turned_right else pg.Rect((self.rect.x, self.rect.y, 10, 10)) 
+        self.head_collider = pg.Rect((self.rect.x + 20, self.rect.y, 5, 5)) if self.turned_right else pg.Rect((self.rect.x + 10, self.rect.y, 5, 5)) 
 
     def move(self, keys):
         """ The move method is responsible for moving the player based on the pressed keys and sets the player idle if no movement key is pressed.
@@ -170,8 +170,4 @@ class Player(Entity):
         self.velocity_y += self.gravity
         self.rect.y += self.velocity_y
 
-        # Check if player lands on the ground
-        if self.rect.y >= 235:
-            self.rect.y = 235
-            self.is_on_ground = True
-            self.velocity_y = 0
+      
