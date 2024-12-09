@@ -161,7 +161,7 @@ class Player(Entity):
             self.jump_speed = 20
         else:
             self.speed = 1.8
-            self.jump_speed = 15
+            self.jump_speed = 10
      
     def apply_gravity(self):
         """ The apply_gravity method is responsible for applying gravity to the player, making it fall to the ground"""
