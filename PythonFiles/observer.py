@@ -1,6 +1,7 @@
 import pygame as pg
 import sound_player as sp
 import os
+from consts import GRAVITY
 
 class Observer:
  """The Score class acts as game observer, because to update the score it needs to listen to the game events.
@@ -53,7 +54,6 @@ class Observer:
     if self.player.fsm.current == self.player.jump:
         self.player_sound_effecter.play("jump")
 
-
  def check_collisions(self):
    """ The check_collision function checks if the player has collided with any of the blocks in the game map.
 
@@ -68,13 +68,15 @@ class Observer:
 
    floor_blocks_colliders = self.game_map.floor_blocks_colliders
 
+   question_blocks_used_colliders = self.game_map.question_blocks_used_colliders
+
    
    # Check if the player has collided with a brick block
    if self.player.rect.collidelist(brick_blocks_colliders) != -1:
       block_index = self.player.rect.collidelist(brick_blocks_colliders)
       block = brick_blocks_colliders[block_index]
    
-      if self.player.rect.top < block.top and self.player.rect.bottom > block.bottom:
+      if self.player.velocity_y <= 0 and self.player.rect.top >= block.bottom and self.player.rect.bottom >= block.top:
 
          self.sound_effecter.play("break_block")
          
@@ -83,8 +85,10 @@ class Observer:
          self.game_map.map[block[1] // 19][block[0] // 16] = None
          self.score += 50
 
-      elif self.player.rect.top < block.top:
-         self.player.bottom = block.top
+      elif self.player.velocity_y > 0  and self.player.rect.bottom < block.top and self.player.rect.top < block.top :
+         self.player.rect.bottom = block.top
+         self.player.on_block = block
+         self.player.velocity_y = 0
          self.player.is_on_ground = True
 
    
@@ -93,35 +97,50 @@ class Observer:
    if self.player.rect.collidelist(question_blocks_colliders) != -1:
       block_index = self.player.rect.collidelist(question_blocks_colliders)
       block = question_blocks_colliders[block_index]
+
     
-      if self.player.rect.top < block.top and self.player.rect.bottom > block.bottom:
+      if self.player.velocity_y <= 0 and self.player.rect.top <= block.bottom and self.player.rect.bottom >= block.top:
           
          self.game_map.question_blocks_colliders = [block for block in question_blocks_colliders if block != block]
 
-         #self.game_map.map[block[1] // 19][block[0] // 16] = self.game_map.QUESTION_BLOCK_USED
+         self.game_map.map[block[1] // 19][block[0] // 16] = self.game_map.QUESTION_BLOCK_USED
 
-      elif self.player.rect.top < block.top:
+      elif self.player.velocity_y > 0  and self.player.rect.bottom > block.top and self.player.rect.top < block.top:
          self.player.bottom = block.top
+         self.player.on_block = block
+         self.player.velocity_y = 0
          self.player.is_on_ground = True
    
 
    if self.player.rect.collidelist(floor_blocks_colliders) != -1:
       block_index = self.player.rect.collidelist(floor_blocks_colliders)
+      block = floor_blocks_colliders[block_index]
+   
+      if self.player.velocity_y > 0  and self.player.rect.bottom > block.top and self.player.rect.top < block.top:
+   
+        self.player.rect.bottom = block.top 
 
-      self.player.rect.y = floor_blocks_colliders[block_index].top - self.player.rect.height
-       
-      self.player.is_on_ground = True
+        self.player.on_block = None
+  
+        self.player.velocity_y = 0
+   
+        self.player.is_on_ground = True
+
+   else: 
+       if self.player.is_on_ground and self.player.rect.collidelist(question_blocks_colliders) == -1 or self.player.rect.collidelist(brick_blocks_colliders) == -1 or self.player.rect.collidelist(question_blocks_used_colliders) == -1:
+          self.player.is_on_ground = False
 
 
-   if self.player.rect.collidelist(self.game_map.question_blocks_used_colliders) != -1:
+   if self.player.rect.collidelist(question_blocks_used_colliders) != -1:
       block_index = self.player.rect.collidelist(question_blocks_colliders)
       block = question_blocks_colliders[block_index]
 
-      if self.player.rect.top < block.top and self.player.rect.bottom > block.bottom:
+      if  self.player.velocity_y <= 0 and self.player.rect.top <= block.bottom and self.player.rect.bottom >= block.top:
          print("hit used block")
 
-      elif self.player.rect.top < block.top:
+      elif self.player.velocity_y > 0  and self.player.rect.bottom > block.top and self.player.rect.top < block.top:
          self.player.bottom = block.top
+         self.player.velocity_y = 0
          self.player.is_on_ground = True
    
     
