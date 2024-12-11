@@ -3,10 +3,10 @@ import game_map as gm
 from player import Player
 from kirby import Kirby
 from observer import Observer
+from camera import Camera
+from consts import SCREEN_HEIGHT
 
-
-
-def update_display(all_sprites, window, game_map,observer, game_time):
+def update_display(all_sprites, window, game_map,observer, game_time, camera):
     """
     The update_display function is responsible for updating the display of the game, drawing the game map, and updating the sprites.
 
@@ -24,28 +24,25 @@ def update_display(all_sprites, window, game_map,observer, game_time):
     window.fill((107, 136, 255))  
 
     # Update camera to center on player
-    #game_map.update_camera(player)
+    game_map.draw(window, camera)
 
-    # Draw the game map with camera
-    game_map.draw(window)   
-
-    observer.draw_ui_labels(window,game_time)
-
-   
     player = next(sprite for sprite in all_sprites if isinstance(sprite, Player))
-
 
     #pg.draw.rect(window,(255, 0, 0), player.head_collider)
     pg.draw.rect(window,(0, 0, 255), player.rect)
 
-    
     #kirby = next(sprite for sprite in all_sprites if isinstance(sprite, Kirby))
     
     #pg.draw.rect(window,(255, 0, 0), kirby.kirby_collider())
     
+    for sprite in all_sprites:
+        sprite.rect = camera.apply(sprite)
+    
     # Update all sprites and draw them on top of the map
     all_sprites.update()
     all_sprites.draw(window)
+    
+    observer.draw_ui_labels(window,game_time)
     
     # Updates the display
     pg.display.flip()
@@ -86,6 +83,7 @@ def game_loop(all_sprites, window, clock, game_map):
     # Get the player object from all_sprites
     player = next(sprite for sprite in all_sprites if isinstance(sprite, Player)) 
     kirby = next(sprite for sprite in all_sprites if isinstance(sprite, Kirby))
+    camera = Camera(window.get_width(), window.get_height())
 
 
     enemies = [kirby]   
@@ -99,7 +97,12 @@ def game_loop(all_sprites, window, clock, game_map):
         
    
         # Update camera to follow player
-        #sgame_map.update_camera(player)
+        camera.update(player)
+        
+        # Check if player has fallen off the map
+        if player.rect.y > SCREEN_HEIGHT:
+            player.rect.x = 0
+            player.rect.y = 235
 
         
         if len(enemies) > 0:
@@ -113,7 +116,7 @@ def game_loop(all_sprites, window, clock, game_map):
         game_time += clock.tick(60)
 
         # Draw everything
-        update_display(all_sprites, window, game_map, observer, game_time)
+        update_display(all_sprites, window, game_map, observer, game_time, camera)
 
         if game_time >= 1000:
             game_time -= 1000

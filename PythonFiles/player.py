@@ -5,6 +5,7 @@ import os
 from inputHandler import InputHandler  # Import the InputHandler class
 from command import MoveRightCommand, MoveLeftCommand, JumpCommand, SprintCommand
 from consts import PLAYER_SPEED, PLAYER_JUMP_SPEED, GRAVITY, PLAYER_FRICTION, SPRINT_SPEED, PLAYER_JUMP_SPEED_SPRINT
+from camera import Camera
 
 class Player(Entity):
     """
@@ -164,6 +165,15 @@ class Player(Entity):
             self.fsm.update("jump", self)
             self.is_on_ground = False
             self.velocity_y = -PLAYER_JUMP_SPEED
+            
+    def apply_gravity(self):
+        """ The apply_gravity method is responsible for applying gravity to the player, making it fall to the ground"""
+
+        self.velocity_y += GRAVITY  
+         
+        if self.velocity_y > 0:    
+            self.fsm.update("fall", self)
+      
 
     def sprint(self):
         """ The sprint method is responsible for making the player sprint if the player is walking.
@@ -174,15 +184,9 @@ class Player(Entity):
 
         elif self.fsm.current == self.jump:
             self.velocity_y = -PLAYER_JUMP_SPEED_SPRINT
+        
      
-    def apply_gravity(self):
-        """ The apply_gravity method is responsible for applying gravity to the player, making it fall to the ground"""
-
-        self.velocity_y += GRAVITY  
-         
-        if self.velocity_y > 0:    
-            self.fsm.update("fall", self)
-      
+    
 
 
       

@@ -47,9 +47,9 @@ class Map:
                     [],
                     [],
                     [None] * 22 + [self.BRICK_BLOCK] * 3 + [None],
-                    [None] * 5  + [self.BRICK_BLOCK,self.QUESTION_BLOCK,self.BRICK_BLOCK] ,
+                    [None] * 5  + [self.BRICK_BLOCK,self.QUESTION_BLOCK,self.BRICK_BLOCK],
                     [None] * 17 + [self.BRICK_BLOCK]*2 + [self.QUESTION_BLOCK,self.BRICK_BLOCK],
-                    [],
+                    [None] * 34 + [self.FLOOR_BLOCK] * 100,
                     [],
                     [self.FLOOR_BLOCK] * 31,
         ]
@@ -60,17 +60,18 @@ class Map:
         self.question_blocks_used_colliders = []
 
     
-    def draw(self,window):
-        """ The draw method is responsible for drawing the game map on the screen  
-                Args:
-                    - window (Surface): The game window object
-        """
-        for row_index,row in enumerate(self.map):
+    def draw(self, window, camera):
+        """ The draw method is responsible for drawing the game map on the screen. """
+        for row_index, row in enumerate(self.map):
             for col_index, tile_index in enumerate(row):
                 if tile_index is None:
                     continue
-                tile_image = self.get_tile_image(self.tile_set,tile_index,(col_index,row_index))
-                window.blit(tile_image,(col_index * self.FLOOR_TILE_WIDTH, row_index * self.FLOOR_TILE_HEIGHT))
+                tile_image = self.get_tile_image(self.tile_set, tile_index, (col_index, row_index))
+                tile_rect = pg.Rect(col_index * self.FLOOR_TILE_WIDTH, row_index * self.FLOOR_TILE_HEIGHT, self.FLOOR_TILE_WIDTH, self.FLOOR_TILE_HEIGHT)
+                # Adjust tile position with the camera
+                window.blit(tile_image, camera.apply(tile_rect))
+
+
 
     def get_tile_image(self,tile_set,tile_index, map_index):
         """ The get_tile_image method is responsible for getting the tile image from the tile set and setting up the blocks colliders
@@ -97,4 +98,4 @@ class Map:
         else:
             self.floor_blocks_colliders.append(block_collider)
 
-        return tile_set.subsurface((x, y, self.FLOOR_TILE_WIDTH, self.FLOOR_TILE_HEIGHT)) 
+        return tile_set.subsurface((x, y, self.FLOOR_TILE_WIDTH, self.FLOOR_TILE_HEIGHT))
