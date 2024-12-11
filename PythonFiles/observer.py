@@ -1,7 +1,7 @@
 import pygame as pg
 import sound_player as sp
 import os
-from consts import GRAVITY
+from consts import GAME_TIME, ALERT_TIME, TIMEOUT, GAME_SECOND
 
 class Observer:
  """The Score class acts as game observer, because to update the score it needs to listen to the game events.
@@ -29,21 +29,18 @@ class Observer:
     self.enemies = enemies
 
 
-    self.music_player = sp.SoundPlayer(True)
+    self.music_player = sp.SoundPlayer(["overworld_theme"], True)
     self.music_player.play("overworld_theme")
 
-    self.sound_effecter = sp.SoundPlayer(False)
-
-    self.player_sound_effecter = sp.SoundPlayer(False)
+    self.sound_effecter = sp.SoundPlayer(["jump","break_block","time_warning"], False)
 
     self.score = 0
-    self.time = 300
+    self.time = GAME_TIME
      
     font_path = os.path.join(os.path.dirname(__file__), "../Assets/Font/mario_nes.ttf")
     self.font = pg.font.Font(font_path, 12)
 
    
-
  def listener(self):
     """ The listener function listens to the game events
         For now this method only listens to the player's collisions with the blocks in the game map, by calling the check_collisions method and plays the sound effect when the player jumps.
@@ -52,7 +49,7 @@ class Observer:
     self.check_collisions()
     
     if self.player.fsm.current == self.player.jump:
-        self.player_sound_effecter.play("jump")
+        self.sound_effecter.play("jump")
 
  def check_collisions(self):
    """ The check_collision function checks if the player has collided with any of the blocks in the game map.
@@ -77,8 +74,6 @@ class Observer:
       block = brick_blocks_colliders[block_index]
    
       if self.player.velocity_y <= 0 and self.player.rect.top >= block.bottom and self.player.rect.bottom >= block.top:
-
-         self.sound_effecter.play("break_block")
          
          self.game_map.brick_blocks_colliders = [block for block in brick_blocks_colliders if block != block]
 
@@ -97,8 +92,7 @@ class Observer:
    if self.player.rect.collidelist(question_blocks_colliders) != -1:
       block_index = self.player.rect.collidelist(question_blocks_colliders)
       block = question_blocks_colliders[block_index]
-
-    
+ 
       if self.player.velocity_y <= 0 and self.player.rect.top <= block.bottom and self.player.rect.bottom >= block.top:
           
          self.game_map.question_blocks_colliders = [block for block in question_blocks_colliders if block != block]
@@ -143,8 +137,6 @@ class Observer:
          self.player.velocity_y = 0
          self.player.is_on_ground = True
    
-    
-   
    enemies_colliders = [enemy.rect for enemy in self.enemies]
    if self.player.rect.collidelist(enemies_colliders) != -1:
 
@@ -185,23 +177,21 @@ class Observer:
             - delta_time (int): The time elapsed since the last frame.
     """
  
-    if delta_time >= 1000 and self.time > 0:
+    if self.time > TIMEOUT and delta_time >= GAME_SECOND :
         self.time -= 1
-
-        if self.time == 0:
-            self.music_player.sound.stop()
 
     time_label = self.font.render(f"TIME", True, (255, 255, 255))
     timer_label = self.font.render(f"{self.time:03}", True, (255, 255, 255))
 
-    if self.time <= 90 and self.time > 0:
-         timer_label = self.font.render(f"{self.time:03}", True, (255, 0, 0))
-         
-         # This if statement is responsible for checking if the music is already sped up
-         if "speed_up" not in self.music_player.music_name:  
-            self.sound_effecter.play("time_warning")
-            self.music_player.change_speed()
+    if self.time == ALERT_TIME:
+       self.sound_effecter.play("time_warning")
 
+    elif self.time <= ALERT_TIME and self.time > TIMEOUT:
+         timer_label = self.font.render(f"{self.time:03}", True, (255, 0, 0))
+
+    elif self.time == TIMEOUT:
+         self.music_player.stop()
+         
     window.blit(time_label, (700, 10))
     window.blit(timer_label, (705, 25))
 
