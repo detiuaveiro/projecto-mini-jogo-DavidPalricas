@@ -59,56 +59,9 @@ class Observer:
       If the player has collided with a question block, it replaces the block with a used question block.
    """
 
-   brick_blocks_colliders =  self.game_map.brick_blocks_colliders
-
-   question_blocks_colliders = self.game_map.question_blocks_colliders
-
-   floor_blocks_colliders = self.game_map.floor_blocks_colliders
-
-   question_blocks_used_colliders = self.game_map.question_blocks_used_colliders
-
-   
-   # Check if the player has collided with a brick block
-   if self.player.rect.collidelist(brick_blocks_colliders) != -1:
-      block_index = self.player.rect.collidelist(brick_blocks_colliders)
-      block = brick_blocks_colliders[block_index]
-   
-      if self.player.velocity_y <= 0 and self.player.rect.top >= block.bottom and self.player.rect.bottom >= block.top:
-         
-         self.game_map.brick_blocks_colliders = [block for block in brick_blocks_colliders if block != block]
-
-         self.game_map.map[block[1] // 19][block[0] // 16] = None
-         self.score += 50
-
-      elif self.player.velocity_y > 0  and self.player.rect.bottom < block.top and self.player.rect.top < block.top :
-         self.player.rect.bottom = block.top
-         self.player.on_block = block
-         self.player.velocity_y = 0
-         self.player.is_on_ground = True
-
-   
-    
-   # Check if the player has collided with a question block
-   if self.player.rect.collidelist(question_blocks_colliders) != -1:
-      block_index = self.player.rect.collidelist(question_blocks_colliders)
-      block = question_blocks_colliders[block_index]
- 
-      if self.player.velocity_y <= 0 and self.player.rect.top <= block.bottom and self.player.rect.bottom >= block.top:
-          
-         self.game_map.question_blocks_colliders = [block for block in question_blocks_colliders if block != block]
-
-         self.game_map.map[block[1] // 19][block[0] // 16] = self.game_map.QUESTION_BLOCK_USED
-
-      elif self.player.velocity_y > 0  and self.player.rect.bottom > block.top and self.player.rect.top < block.top:
-         self.player.bottom = block.top
-         self.player.on_block = block
-         self.player.velocity_y = 0
-         self.player.is_on_ground = True
-   
-
-   if self.player.rect.collidelist(floor_blocks_colliders) != -1:
-      block_index = self.player.rect.collidelist(floor_blocks_colliders)
-      block = floor_blocks_colliders[block_index]
+   if self.player.rect.collidelist(self.game_map.floor_blocks_colliders) != -1:
+      block_index = self.player.rect.collidelist(self.game_map.floor_blocks_colliders)
+      block = self.game_map.floor_blocks_colliders[block_index]
    
       if self.player.velocity_y > 0  and self.player.rect.bottom > block.top and self.player.rect.top < block.top:
    
@@ -120,22 +73,9 @@ class Observer:
    
         self.player.is_on_ground = True
 
-   else: 
-       if self.player.is_on_ground and self.player.rect.collidelist(question_blocks_colliders) == -1 or self.player.rect.collidelist(brick_blocks_colliders) == -1 or self.player.rect.collidelist(question_blocks_used_colliders) == -1:
+   else:
           self.player.is_on_ground = False
 
-
-   if self.player.rect.collidelist(question_blocks_used_colliders) != -1:
-      block_index = self.player.rect.collidelist(question_blocks_colliders)
-      block = question_blocks_colliders[block_index]
-
-      if  self.player.velocity_y <= 0 and self.player.rect.top <= block.bottom and self.player.rect.bottom >= block.top:
-         print("hit used block")
-
-      elif self.player.velocity_y > 0  and self.player.rect.bottom > block.top and self.player.rect.top < block.top:
-         self.player.bottom = block.top
-         self.player.velocity_y = 0
-         self.player.is_on_ground = True
    
    enemies_colliders = [enemy.rect for enemy in self.enemies]
    if self.player.rect.collidelist(enemies_colliders) != -1:
@@ -204,6 +144,3 @@ class Observer:
     """
     self.draw_score_label(window)
     self.draw_timer_label(window,delta_time)
-
-  
-

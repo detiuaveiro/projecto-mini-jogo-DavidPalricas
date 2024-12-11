@@ -96,8 +96,6 @@ class Animator:
         
         num_frames = round(tile_set.get_width() / sprite_width)
 
-       
-        
         for i in range(num_frames):
             if i == 0:
                 frame = tile_set.subsurface((i * sprite_width, 0, sprite_width, tile_set.get_height()))

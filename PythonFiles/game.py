@@ -4,7 +4,7 @@ from player import Player
 from kirby import Kirby
 from observer import Observer
 from camera import Camera
-from consts import SCREEN_HEIGHT
+from consts import SCREEN_WIDTH,SCREEN_HEIGHT, FPS, GAME_SECOND
 
 def update_display(all_sprites, window, game_map,observer, game_time, camera):
     """
@@ -95,7 +95,6 @@ def game_loop(all_sprites, window, clock, game_map):
     while running:
         running = event_handler(running)
         
-   
         # Update camera to follow player
         camera.update(player)
         
@@ -113,13 +112,13 @@ def game_loop(all_sprites, window, clock, game_map):
                     all_sprites.remove(enemy)
         
 
-        game_time += clock.tick(60)
+        game_time += clock.tick(FPS)
 
         # Draw everything
         update_display(all_sprites, window, game_map, observer, game_time, camera)
 
-        if game_time >= 1000:
-            game_time -= 1000
+        if game_time >= GAME_SECOND:
+            game_time -= GAME_SECOND
 
     pg.quit()
 
@@ -151,7 +150,7 @@ def setup_pygame():
             - clock: The game clock object used for controlling the frame rate.
     """
     pg.init()
-    window = pg.display.set_mode((800, 277))
+    window = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pg.display.set_caption("Super Bowser")
     clock = pg.time.Clock()
 
@@ -162,7 +161,6 @@ def main():
     """
     window, clock = setup_pygame()
 
-    window_width, window_height = window.get_size()
     game_map = gm.Map()
     #camera = game_map.get_camera()
 

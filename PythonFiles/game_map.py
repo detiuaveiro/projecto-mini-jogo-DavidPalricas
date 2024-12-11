@@ -1,41 +1,51 @@
 import pygame as pg
 import os
 
+from consts import FLOOR_TILE_WIDTH, FLOOR_TILE_HEIGHT, FLOOR_BLOCK, FLOOR_BLOCK_SPRITE_PATH
+
 class Map:
-    """ The Map class is responsible for managing the game map in the game world
+    """ The Map class is responsible for creating the game map and drawing it on the screen.
 
-        The class has the following attributes:
+        This is implemented as a singleton to ensure only one instance exists, during the game.
 
+        Attributes:
+            - instance (Map): The instance of the Map class
             - tile_set (Surface): The tile set of the game map
-            - FLOOR_TILE_WIDTH (int): The width of the floor tile
-            - FLOOR_TILE_HEIGHT (int): The height of the floor tile
             - tile_per_row (int): The number of tiles per row
             - tile_per_col (int): The number of tiles per column
-            - FLOOR_BLOCK (int): The index of the floor block
-            - BRICK_BLOCK (int): The index of the brick block
-            - QUESTION_BLOCK_USED (int): The index of the used question block
-            - QUESTION_BLOCK (int): The index of the question block
-            - map (list): The game map
-            - floor_blocks (list): The list of floor blocks
-            - brick_blocks (list): The list of brick blocks
-            - question_blocks (list): The list of question blocks
+            - map (list of lists): The game map
+            - floor_blocks_colliders (list): The list of floor block colliders
     """
+
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        """ The __new__ method is responsible for creating a new instance of the Map class if it does not exist.
+            In this method we ensure that only one instance of the Map class exists during the game, to adopt the singleton design pattern.
+            This method is called before the __init__ method (constructor of the class)
+
+            Args:
+                - cls (Map): The class of the instance
+                - *args: The arguments
+                - **kwargs: The keyword arguments
+
+            Returns:
+                - Map: The instance of the Map class
+        """
+
+        if cls._instance is None:
+            cls._instance = super(Map, cls).__new__(cls, *args, **kwargs)
+
+        return cls._instance
+
     def __init__(self) -> None:
-        """ Initializes a new instance of the Map class and sets up the game map atrributes"""
-
-        tile_set_path = (os.path.join(os.path.dirname(__file__), "../Assets/SpriteSheets/Map/overworld_tileset.png"))
-        self.tile_set = pg.image.load(tile_set_path)
-
-        self.FLOOR_TILE_WIDTH = 16
-        self.FLOOR_TILE_HEIGHT = 19
-
-        self.tile_per_row = self.tile_set.get_width() // self.FLOOR_TILE_WIDTH
-        self.tile_per_col = self.tile_set.get_height() // self.FLOOR_TILE_HEIGHT
-
-        self.FLOOR_BLOCK = 0
-        self.BRICK_BLOCK = 1
-        self.QUESTION_BLOCK_USED = 2
-        self.QUESTION_BLOCK = 3
+        """ Initializes a new instance of the Map class and sets up the game map attributes
+            If the instance of the Map class exists, this method does not create a new instance (singleton design pattern)  
+        """
+        if hasattr(self, '_initialized') and self._initialized:
+            return
+        
+        self.floor_block_sprite = pg.image.load(os.path.join(os.path.dirname(__file__), FLOOR_BLOCK_SPRITE_PATH)).convert_alpha()
 
         self.map = [[],
                     [],
@@ -46,56 +56,34 @@ class Map:
                     [],
                     [],
                     [],
-                    [None] * 22 + [self.BRICK_BLOCK] * 3 + [None],
-                    [None] * 5  + [self.BRICK_BLOCK,self.QUESTION_BLOCK,self.BRICK_BLOCK],
-                    [None] * 17 + [self.BRICK_BLOCK]*2 + [self.QUESTION_BLOCK,self.BRICK_BLOCK],
-                    [None] * 34 + [self.FLOOR_BLOCK] * 100,
                     [],
-                    [self.FLOOR_BLOCK] * 31,
+                    [],
+                    [],
+                    [None] * 34 + [FLOOR_BLOCK] * 100,
+                    [],
+                    [FLOOR_BLOCK] * 31,
         ]
 
         self.floor_blocks_colliders = []
-        self.brick_blocks_colliders = []
-        self.question_blocks_colliders = []
-        self.question_blocks_used_colliders = []
+        self._initialized = True
 
-    
     def draw(self, window, camera):
-        """ The draw method is responsible for drawing the game map on the screen. """
-        for row_index, row in enumerate(self.map):
-            for col_index, tile_index in enumerate(row):
-                if tile_index is None:
-                    continue
-                tile_image = self.get_tile_image(self.tile_set, tile_index, (col_index, row_index))
-                tile_rect = pg.Rect(col_index * self.FLOOR_TILE_WIDTH, row_index * self.FLOOR_TILE_HEIGHT, self.FLOOR_TILE_WIDTH, self.FLOOR_TILE_HEIGHT)
-                # Adjust tile position with the camera
-                window.blit(tile_image, camera.apply(tile_rect))
+        """ The draw method is responsible for drawing the game map on the screen.
+            It iterates over the map list and draws the tiles in their positions (FLOOR_BLOCK) on the screen.
+            The list with the floor block colliders is also updated in this method.
 
-
-
-    def get_tile_image(self,tile_set,tile_index, map_index):
-        """ The get_tile_image method is responsible for getting the tile image from the tile set and setting up the blocks colliders
-             
-             Args:
-                 - tile_set (Surface): The tile set of the game map
-                 - tile_index (int): The index of the tile in the tile set
-                 - map_index (tuple): The index of the tile in the game map
-             
-             Returns:
-                 - Surface: The tile image from the tile set
+            Args:
+                - window (Surface): The game window
+                - camera (Camera): The camera object
         """
-        row, column = tile_index // self.tile_per_row, tile_index % self.tile_per_row
-        block_width, block_height = (self.FLOOR_TILE_WIDTH - 2 , self.FLOOR_TILE_HEIGHT) if tile_index == self.FLOOR_BLOCK else (17, 19)
-       
-        x, y = column * block_width, row * block_height
-                  
-        block_collider = pg.Rect(map_index[0] * self.FLOOR_TILE_WIDTH , map_index[1] * self.FLOOR_TILE_HEIGHT, block_width, block_height) 
-          
-        if tile_index == self.BRICK_BLOCK:
-            self.brick_blocks_colliders.append(block_collider)
-        elif tile_index == self.QUESTION_BLOCK:
-            self.question_blocks_colliders.append(block_collider)
-        else:
-            self.floor_blocks_colliders.append(block_collider)
+        for row_index, row in enumerate(self.map):
+            for column_index, floor_block__index in enumerate(row):
 
-        return tile_set.subsurface((x, y, self.FLOOR_TILE_WIDTH, self.FLOOR_TILE_HEIGHT))
+                if floor_block__index is FLOOR_BLOCK:  
+                    x, y = column_index * FLOOR_TILE_WIDTH, row_index * FLOOR_TILE_HEIGHT
+
+                    floor_block_collider = pg.Rect(x, y, FLOOR_TILE_WIDTH, FLOOR_TILE_HEIGHT)
+
+                    self.floor_blocks_colliders.append(floor_block_collider)
+
+                    window.blit(self.floor_block_sprite, camera.apply(floor_block_collider))

@@ -2,6 +2,7 @@ from entity import Entity
 import finite_state_machine as fsm
 import pygame as pg
 import os
+from consts import KIRBY_IDLE_SPRITE_PATH, KIRBY_SPEED, KIRBY_PATROL_MAX_DISTANCE
 
 class Kirby(Entity):
     
@@ -10,21 +11,19 @@ class Kirby(Entity):
             Initializes a new instance of the Kirby class, and calls the constructor of the Entity class (the parent
        """
         
-        sprite_path = os.path.join(os.path.dirname(__file__), "../Assets/SpriteSheets/Enemies/Kirby/Idle/Kirby_idle.png")
+        sprite_path = os.path.join(os.path.dirname(__file__), KIRBY_IDLE_SPRITE_PATH)
         
         super().__init__(sprite_path, collider)
-
 
         # Set up the kirby's attributes
         self.walked_distance = 0
            
         # Set up the atrributes inherited from the Entity class
-        self.speed = 1.2
+        self.speed = KIRBY_SPEED
         self.turned_right = True
         self.name = "Kirby"
 
         self.dead = False
-
         
          # Initialize FSM and states
         self.fsm = fsm.FSM(self.set_states(), self.set_transitions())
@@ -56,7 +55,6 @@ class Kirby(Entity):
 
         self.patrol()
 
-
         self.animator.play_animation(self.fsm.current.name, self)
 
 
@@ -76,7 +74,7 @@ class Kirby(Entity):
             self.walked_distance += self.speed
             self.rect.x -= self.speed
 
-        if self.walked_distance >= 100:
+        if self.walked_distance >= KIRBY_PATROL_MAX_DISTANCE:
             self.turned_right =  not self.turned_right
             self.walked_distance = 0
 
@@ -87,9 +85,3 @@ class Kirby(Entity):
                 
             self.fsm.update("idle", self)
             
-    #def kirby_collider(self):
-        """ The kirby_collider method is responsible for creating a collider for the kirby
-            Returns:
-                - Rect: The kirby's collider
-        """
-        #return pg.Rect(self.rect.x, self.rect.y, 16, 16)

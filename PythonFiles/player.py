@@ -2,9 +2,9 @@ import pygame as pg
 from entity import Entity
 import finite_state_machine as fsm
 import os
-from inputHandler import InputHandler  # Import the InputHandler class
+from inputHandler import InputHandler 
 from command import MoveRightCommand, MoveLeftCommand, JumpCommand, SprintCommand
-from consts import PLAYER_SPEED, PLAYER_JUMP_SPEED, GRAVITY, PLAYER_FRICTION, SPRINT_SPEED, PLAYER_JUMP_SPEED_SPRINT
+from consts import PLAYER_SPEED, PLAYER_JUMP_SPEED, GRAVITY, PLAYER_FRICTION, SPRINT_SPEED, PLAYER_JUMP_SPEED_SPRINT, PLAYER_IDLE_SPRITE_PATH
 from camera import Camera
 
 class Player(Entity):
@@ -28,13 +28,11 @@ class Player(Entity):
         """
 
         if not hasattr(self, 'initialized'):
-            sprite_path = os.path.join(os.path.dirname(__file__), "../Assets/SpriteSheets/Bowser/Idle/bowser_idle.png")
+            sprite_path = os.path.join(os.path.dirname(__file__), PLAYER_IDLE_SPRITE_PATH)
             super().__init__(sprite_path, collider)
             
-
             # Set up the player's attributes
         
-
             # Set up the attributes inherited from the Entity class
         
             self.is_on_ground = True
@@ -45,8 +43,6 @@ class Player(Entity):
 
 
             self.on_block = None
-
-        
 
             # Initialize FSM and states
             self.fsm = fsm.FSM(self.set_states(), self.set_transitions())
@@ -160,10 +156,9 @@ class Player(Entity):
         """ The initiate_jump method is responsible for making the player jump if it is on the ground.
             It also updates the player's state to jump and plays the jump sound effect.
         """
-  
+
         if self.is_on_ground:
             self.fsm.update("jump", self)
-            self.is_on_ground = False
             self.velocity_y = -PLAYER_JUMP_SPEED
             
     def apply_gravity(self):
