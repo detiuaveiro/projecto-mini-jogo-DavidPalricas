@@ -1,15 +1,19 @@
 import pygame as pg
 import os
+
 class Animator:
-    """The Animator class is responsible for playing animations for the entities
+    """The Animator class is responsible for playing animations for the entities. It uses the Flyweight pattern to store shared instances of animations.
 
        The class has the following attributes:
+         - _animations: A dictionary that stores the shared instances of animations (Flyweight storage)
          - current_animation: The current animation that is being played
          - animation_index: The index of the current frame in the animation
          - animation_delay: The delay between each frame in milliseconds
          - animations_frames: The frames of the current animation
          - last_update: The time of the last update in milliseconds 
     """
+
+    _animations = {}
 
     def __init__(self) -> None:
         """ 
@@ -60,6 +64,8 @@ class Animator:
     def load_animation_frames(self, entity, state):
         """The load_animation_frames method is responsible for loading the animation frames for the given state
 
+           It first checks if the frames are already stored in the animations_storage dictionary. If not, it loads the frames from the sprite sheet and saves them in the dictionary for future use.
+
             Args:
                 - entity (Entity): The entity that the animation belongs to
                 - state (str): The state of the entity (e.g. idle, walk, jump)
@@ -67,19 +73,27 @@ class Animator:
             Returns:
                 - frames (list): A list of the animation frames     
         """
+
+        key = f"{entity.name}_{state}"  
+
+        if key in self._animations:
+            return self._animations[key] 
+        
         if entity.name == "Bowser":
-            new_image = pg.image.load(os.path.join(os.path.dirname(__file__), f"../Assets/SpriteSheets/{entity.name}/{state}/{entity.name}_{state}.png")).convert_alpha()
-        else: 
-            new_image = pg.image.load(os.path.join(os.path.dirname(__file__), f"../Assets/SpriteSheets/Enemies/{entity.name}/{state}/{entity.name}_{state}.png")).convert_alpha()
+            image_path = os.path.join(os.path.dirname(__file__),  f"../Assets/SpriteSheets/{entity.name}/{state}/{entity.name}_{state}.png")
+        else:
+            image_path = os.path.join(os.path.dirname(__file__), f"../Assets/SpriteSheets/Enemies/{entity.name}/{state}/{entity.name}_{state}.png")
 
-        # Check if the image is a tileset (based on the width of the original sprite)
+        new_image = pg.image.load(image_path).convert_alpha()
 
-   
-        if new_image.get_width() > entity.dimensions[0]:
-            return self.split_tileset(new_image, entity.dimensions[0])
-        else:      
-            # To ensure that all the frames have the same width as the original sprite
-            return [pg.transform.scale(new_image,(entity.dimensions[0],new_image.get_height()))]
+        # Check if the image is a tileset (based on the width of the original sprite) or if it's a single frame
+
+        frames = self.split_tileset(new_image, entity.dimensions[0]) if new_image.get_width() > entity.dimensions[0] else [pg.transform.scale(new_image, (entity.dimensions[0], new_image.get_height()))]
+
+        # Save the frames in the animations_storage dictionary
+        self._animations[key] = frames
+        
+        return frames
 
     def split_tileset(self, tile_set, sprite_width):
         """The split_tileset method is responsible for splitting the tileset into individual frames
