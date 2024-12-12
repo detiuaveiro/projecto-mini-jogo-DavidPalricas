@@ -4,7 +4,15 @@ from player import Player
 from kirby import Kirby
 from observer import Observer
 from camera import Camera
-from consts import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, GAME_SECOND
+from consts import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, GAME_SECOND, GAME_TIME, TIMEOUT
+
+# Define custom event types
+PLAYER_DEATH_EVENT = pg.USEREVENT + 1
+TIMEOUT_EVENT = pg.USEREVENT + 2
+TIME_ALERT_EVENT = pg.USEREVENT + 3
+JUMP_EVENT = pg.USEREVENT + 4
+END_GAME_EVENT = pg.USEREVENT + 5
+ENEMY_DEATH_EVENT = pg.USEREVENT + 6
 
 def update_display(all_sprites, window, game_map, observer, game_time, camera):
     """
@@ -55,7 +63,25 @@ def event_handler(running):
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
-            
+        elif event.type == PLAYER_DEATH_EVENT:
+            print("Player has died")
+            # Handle player death
+        elif event.type == TIMEOUT_EVENT:
+            print("Timeout occurred")
+            # Handle timeout
+        elif event.type == TIME_ALERT_EVENT:
+            print("Time alert")
+            # Handle time alert
+        elif event.type == JUMP_EVENT:
+            print("Player jumped")
+            # Handle jump (play sound effect)
+        elif event.type == END_GAME_EVENT:
+            print("End of game")
+            # Handle end of game
+        elif event.type == ENEMY_DEATH_EVENT:
+            print("Enemy has died")
+            # Handle enemy death
+
     return running
    
 def game_loop(all_sprites, window, clock, game_map):
@@ -81,7 +107,7 @@ def game_loop(all_sprites, window, clock, game_map):
  
     observer = Observer(player, game_map, enemies)
     
-    game_time = 0
+    game_time = GAME_TIME * GAME_SECOND  # Total game time in milliseconds
 
     while running:
         running = event_handler(running)
@@ -93,25 +119,31 @@ def game_loop(all_sprites, window, clock, game_map):
         
         # Check if player has fallen off the map
         if player.rect.y > SCREEN_HEIGHT:
+            pg.event.post(pg.event.Event(PLAYER_DEATH_EVENT))
             player.rect.x = 0
             player.rect.y = 235
 
-        
         if len(enemies) > 0:
             for enemy in enemies:
                 if enemy.dead:
+                    pg.event.post(pg.event.Event(ENEMY_DEATH_EVENT))
                     observer.enemies = [enemies for enemies in observer.enemies if enemies.dead == False]
                     enemies.remove(enemy)
                     all_sprites.remove(enemy)
-        
 
-        game_time += clock.tick(FPS)
+        # Decrease game time by the elapsed time in seconds
+        elapsed_time = clock.tick(FPS) / 10000
+        game_time -= elapsed_time
 
         # Draw everything
         update_display(all_sprites, window, game_map, observer, game_time, camera)
 
-        if game_time >= GAME_SECOND:
-            game_time -= GAME_SECOND
+        if game_time <= 0:
+            pg.event.post(pg.event.Event(TIMEOUT_EVENT))
+            game_time = 0  # Ensure game_time does not go negative
+
+        if int(game_time) % 10 == 0:
+            pg.event.post(pg.event.Event(TIME_ALERT_EVENT))
 
     pg.quit()
 
