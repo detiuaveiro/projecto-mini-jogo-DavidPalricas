@@ -179,9 +179,3 @@ class Player(Entity):
 
         elif self.fsm.current == self.jump:
             self.velocity_y = -PLAYER_JUMP_SPEED_SPRINT
-        
-     
-    
-
-
-      

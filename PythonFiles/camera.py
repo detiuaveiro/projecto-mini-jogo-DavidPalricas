@@ -1,49 +1,45 @@
-import pygame as pg
+import pygame
 
 class Camera:
     _instance = None
 
-    def __new__(cls, width, height):
-        if cls._instance is None:
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
             cls._instance = super(Camera, cls).__new__(cls)
-            cls._instance.__init__(width, height)
         return cls._instance
 
     def __init__(self, width, height):
+        """Initialize camera"""
         if not hasattr(self, 'initialized'):  # Ensure __init__ is only called once
+            self.camera = pygame.Rect(0, 0, width, height)
             self.width = width
             self.height = height
-            self.camera = pg.Rect(0, 0, width, height)
-            # Define the tracking box (centered and smaller than the screen)
-            self.tracking_box = pg.Rect(
-                width // 4, height // 4, width // 2, height // 2
-            )
             self.initialized = True
 
-    def apply(self, target):
-        """
-        Adjust the target's rect or position by the camera offset.
-        Can handle both entities with a rect attribute and standalone pygame.Rect objects.
-        """
-        if isinstance(target, pg.Rect):
-            return target.move(self.camera.topleft)
-        return target.rect.move(self.camera.topleft)
+    def apply(self, entity):
+        """Apply camera offset to an entity"""
+        if isinstance(entity, pygame.Rect):
+            return entity.move(self.camera.topleft)
+        return entity.rect.move(self.camera.topleft)
+
+    def apply_rect(self, rect):
+        """Apply camera offset to a rectangle"""
+        return rect.move(self.camera.topleft)
 
     def update(self, target):
-        """
-        Updates the camera position based on the player's position
-        and the tracking box constraints.
-        """
-        if target.rect.left < self.tracking_box.left:
-            self.camera.x -= self.tracking_box.left - target.rect.left  
-        elif target.rect.right > self.tracking_box.right:
-            self.camera.x += target.rect.right - self.tracking_box.right
+        """Update camera position to follow target"""
+        # Center the camera on the target
+        x = -target.rect.centerx + self.width // 2
+        y = -target.rect.centery + self.height // 2
 
-        if target.rect.top < self.tracking_box.top:
-            self.camera.y -= self.tracking_box.top - target.rect.top
-        elif target.rect.bottom > self.tracking_box.bottom:
-            self.camera.y += target.rect.bottom - self.tracking_box.bottom
+        # Limit scrolling to map boundaries
+        x = min(0, x)  # Left boundary
+        y = min(0, y)  # Top boundary
+        
+        # Assuming a large map width and height - adjust these as needed
+        map_width = 2000  # Example map width
+        map_height = 277  # Example map height
+        x = max(-(map_width - self.width), x)  # Right boundary
+        y = max(-(map_height - self.height), y)  # Bottom boundary
 
-        # Keep the camera within the bounds of the game world
-        self.camera.x = max(0, min(self.camera.x, self.camera.width - self.width))
-        self.camera.y = max(0, min(self.camera.y, self.camera.height - self.height))
+        self.camera = pygame.Rect(x, y, self.width, self.height)

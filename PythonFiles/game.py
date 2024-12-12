@@ -4,9 +4,9 @@ from player import Player
 from kirby import Kirby
 from observer import Observer
 from camera import Camera
-from consts import SCREEN_WIDTH,SCREEN_HEIGHT, FPS, GAME_SECOND
+from consts import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, GAME_SECOND
 
-def update_display(all_sprites, window, game_map,observer, game_time, camera):
+def update_display(all_sprites, window, game_map, observer, game_time, camera):
     """
     The update_display function is responsible for updating the display of the game, drawing the game map, and updating the sprites.
 
@@ -28,26 +28,18 @@ def update_display(all_sprites, window, game_map,observer, game_time, camera):
 
     player = next(sprite for sprite in all_sprites if isinstance(sprite, Player))
 
-    #pg.draw.rect(window,(255, 0, 0), player.head_collider)
-    pg.draw.rect(window,(0, 0, 255), player.rect)
+    # Draw the player with the camera offset
+    window.blit(player.image, camera.apply(player))
 
-    #kirby = next(sprite for sprite in all_sprites if isinstance(sprite, Kirby))
-    
-    #pg.draw.rect(window,(255, 0, 0), kirby.kirby_collider())
-    
+    # Draw other sprites without the camera offset
     for sprite in all_sprites:
-        sprite.rect = camera.apply(sprite)
-    
-    # Update all sprites and draw them on top of the map
-    all_sprites.update()
-    all_sprites.draw(window)
-    
-    observer.draw_ui_labels(window,game_time)
+        if not isinstance(sprite, Player):
+            window.blit(sprite.image, sprite.rect)
+
+    observer.draw_ui_labels(window, game_time)
     
     # Updates the display
     pg.display.flip()
-
-
 
 def event_handler(running):
     """ The event_handler function is responsible for handling the events in the game, such as quitting the game.
@@ -83,8 +75,7 @@ def game_loop(all_sprites, window, clock, game_map):
     # Get the player object from all_sprites
     player = next(sprite for sprite in all_sprites if isinstance(sprite, Player)) 
     kirby = next(sprite for sprite in all_sprites if isinstance(sprite, Kirby))
-    camera = Camera(window.get_width(), window.get_height())
-
+    camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
 
     enemies = [kirby]   
  
@@ -95,7 +86,9 @@ def game_loop(all_sprites, window, clock, game_map):
     while running:
         running = event_handler(running)
         
-        # Update camera to follow player
+        # Update player position
+        all_sprites.update()
+        
         camera.update(player)
         
         # Check if player has fallen off the map
@@ -157,12 +150,12 @@ def setup_pygame():
     return window, clock
 
 def main():
-    """ The main fyunction of the game, sets up the pygame, creates the game map and sprites, and also runs the game loop.
+    """ The main function of the game, sets up the pygame, creates the game map and sprites, and also runs the game loop.
     """
     window, clock = setup_pygame()
 
     game_map = gm.Map()
-    #camera = game_map.get_camera()
+    #camera = game_map.get_camera()  # Commented out
 
     all_sprites = setup_sprites()  
 
