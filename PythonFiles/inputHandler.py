@@ -1,5 +1,5 @@
 import pygame as pg
-from command import MoveRightCommand, MoveLeftCommand, JumpCommand, SprintCommand
+from command import MoveRightCommand, MoveLeftCommand, JumpCommand, SprintCommand, QuitGameCommand
 
 class InputHandler:
     def __init__(self):
@@ -11,7 +11,8 @@ class InputHandler:
             pg.K_a: MoveLeftCommand(),
             pg.K_d: MoveRightCommand(),
             pg.K_SPACE: JumpCommand(),
-            pg.K_LSHIFT: SprintCommand()
+            pg.K_LSHIFT: SprintCommand(),
+            pg.K_ESCAPE: QuitGameCommand()
         }
 
     def set_command(self, key, command):

@@ -17,3 +17,7 @@ class JumpCommand(Command):
 class SprintCommand(Command):
     def execute(self, player):
         player.sprint()
+
+class QuitGameCommand(Command):
+    def execute(self, player):
+        player.quit_game()

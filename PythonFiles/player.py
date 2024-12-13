@@ -179,3 +179,7 @@ class Player(Entity):
 
         elif self.fsm.current == self.jump:
             self.velocity_y = -PLAYER_JUMP_SPEED_SPRINT
+
+    def quit_game(self):
+        """ The quit_game method is responsible for quitting the game"""
+        pg.quit()

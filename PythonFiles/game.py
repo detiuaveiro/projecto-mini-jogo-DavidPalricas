@@ -4,7 +4,7 @@ from player import Player
 from kirby import Kirby
 from observer import Observer
 from camera import Camera
-from consts import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, GAME_SECOND, GAME_TIME, TIMEOUT
+from consts import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, GAME_SECOND, GAME_TIME
 
 # Define custom event types
 PLAYER_DEATH_EVENT = pg.USEREVENT + 1
@@ -13,6 +13,7 @@ TIME_ALERT_EVENT = pg.USEREVENT + 3
 JUMP_EVENT = pg.USEREVENT + 4
 END_GAME_EVENT = pg.USEREVENT + 5
 ENEMY_DEATH_EVENT = pg.USEREVENT + 6
+QUIT_GAME_EVENT = pg.USEREVENT + 7  
 
 def update_display(all_sprites, window, game_map, observer, game_time, camera):
     """
@@ -22,8 +23,6 @@ def update_display(all_sprites, window, game_map, observer, game_time, camera):
         - all_sprites: The group of all the sprites in the game.
         - window: The game window object.
         - game_map: The game map object.
-        - score: The score object.
-        - clock: The game clock object used for controlling the frame rate.
         - game_time: The time elapsed in the game.
     """
     
@@ -49,11 +48,14 @@ def update_display(all_sprites, window, game_map, observer, game_time, camera):
     # Updates the display
     pg.display.flip()
 
-def event_handler(running):
+def event_handler(running, all_sprites, enemies, observer):
     """ The event_handler function is responsible for handling the events in the game, such as quitting the game.
         
         Args:
             - running: A flag indicating whether the game is running or not.
+            - all_sprites: The group of all the sprites in the game.
+            - enemies: The list of enemy sprites.
+            - observer: The observer object.
 
         Returns:
             - running: A flag indicating whether the game is running or not.
@@ -62,6 +64,9 @@ def event_handler(running):
 
     for event in pg.event.get():
         if event.type == pg.QUIT:
+            running = False
+        elif event.type == QUIT_GAME_EVENT:
+            print("Quit game event triggered")
             running = False
         elif event.type == PLAYER_DEATH_EVENT:
             print("Player has died")
@@ -106,11 +111,11 @@ def game_loop(all_sprites, window, clock, game_map):
     enemies = [kirby]   
  
     observer = Observer(player, game_map, enemies)
-    
-    game_time = GAME_TIME * GAME_SECOND  # Total game time in milliseconds
+
+    game_time = 0
 
     while running:
-        running = event_handler(running)
+        running = event_handler(running, all_sprites, enemies, observer)
         
         # Update player position
         all_sprites.update()
@@ -131,19 +136,22 @@ def game_loop(all_sprites, window, clock, game_map):
                     enemies.remove(enemy)
                     all_sprites.remove(enemy)
 
-        # Decrease game time by the elapsed time in seconds
-        elapsed_time = clock.tick(FPS) / 10000
-        game_time -= elapsed_time
-
-        # Draw everything
-        update_display(all_sprites, window, game_map, observer, game_time, camera)
+        game_time += clock.tick(FPS)
 
         if game_time <= 0:
             pg.event.post(pg.event.Event(TIMEOUT_EVENT))
-            game_time = 0  # Ensure game_time does not go negative
+            running = False
 
-        if int(game_time) % 10 == 0:
+        if game_time <= GAME_TIME * GAME_SECOND - GAME_SECOND * 30:
             pg.event.post(pg.event.Event(TIME_ALERT_EVENT))
+
+        if not player.is_on_ground:
+            pg.event.post(pg.event.Event(JUMP_EVENT))
+        
+        update_display(all_sprites, window, game_map, observer, game_time, camera)
+
+        if game_time >= GAME_SECOND:
+            game_time -= GAME_SECOND
 
     pg.quit()
 

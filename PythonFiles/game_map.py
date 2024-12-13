@@ -57,9 +57,9 @@ class Map:
                     [],
                     [],
                     [],
-                    [],
-                    [],
-                    [None] * 34 + [FLOOR_BLOCK] * 100,
+                    [None] * 60 + [FLOOR_BLOCK] * 10,
+                    [None] * 47 + [FLOOR_BLOCK] * 10 + [None] * 16 + [FLOOR_BLOCK] * 10,
+                    [None] * 34 + [FLOOR_BLOCK] * 10,
                     [],
                     [FLOOR_BLOCK] * 31,
         ]
