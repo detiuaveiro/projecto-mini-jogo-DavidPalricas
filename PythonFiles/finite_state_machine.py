@@ -160,8 +160,29 @@ class GameOver(State):
             print("Game Over")
             return super().update(object)
     
+class StartMenu(State):
+    """The StartGame class is responsible for managing the start game state of the entity
+    """
 
-    
+    def __init__(self) -> None:
+        """ 
+            Initializes a new instance of the StartGame class, and calls the constructor of the State class (the parent class)
+        """
+
+        super().__init__(self.__class__.__name__)
+
+    def update(self, object):
+        """The update method is responsible for updating the start game state of the entity
+
+            Args:
+                - object (Entity): The entity that the state belongs to
+
+            Returns:
+                - bool: A flag indicating to update the entity state
+        """
+
+        print("Game Started")
+        return super().update(object)
 
 class FSM:
     """The FSM class is responsible for managing the finite state machine of the entity

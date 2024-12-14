@@ -1,6 +1,5 @@
 import pygame as pg
 
-
 # Game Event Constants
 GAME_EVENTS = {"QUIT_GAME_EVENT": pg.USEREVENT + 1, 
                "PLAYER_DEATH_EVENT": pg.USEREVENT + 2, 
@@ -48,4 +47,4 @@ KIRBY_PATROL_MAX_DISTANCE = 100
 # UI Constants
 FONT_PATH = "../Assets/Font/mario_nes.ttf"
 FONT_SIZE = 12
-COLORS = {"WHITE": (255, 255, 255), "RED": (255, 0, 0)}
+COLORS = {"WHITE": (255, 255, 255), "RED": (255, 0, 0), "BLACK": (0, 0, 0), "BACKGROUND": (107, 136, 255)}

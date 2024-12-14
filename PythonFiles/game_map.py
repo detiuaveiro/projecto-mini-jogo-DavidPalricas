@@ -53,16 +53,16 @@ class Map:
                     [],
                     [],
                     [],
-                    [],
-                    [],
-                    [],
-                    [],
-                    [],
                     [None] * 60 + [FLOOR_BLOCK] * 10,
+                    [],
+                    [], 
                     [None] * 47 + [FLOOR_BLOCK] * 10 + [None] * 16 + [FLOOR_BLOCK] * 10,
-                    [None] * 34 + [FLOOR_BLOCK] * 10,
-                    [None] * 100 + [PEACH_SPRITE_PATH],
-                    [FLOOR_BLOCK] * 31 + [None] * 69 + [FLOOR_BLOCK] * 5,
+                    [], 
+                    [],
+                    [None] * 34 + [FLOOR_BLOCK] * 10 + [None] * 16 + [FLOOR_BLOCK] * 10, 
+                    [],
+                    [None] * 90 + [PEACH_SPRITE_PATH],
+                    [FLOOR_BLOCK] * 31 + [None] * 56 + [FLOOR_BLOCK] * 5,
         ]
 
         self.floor_blocks_colliders = []
@@ -96,3 +96,18 @@ class Map:
                     self.peach_collider = pg.Rect(x, y, FLOOR_TILE_WIDTH, FLOOR_TILE_HEIGHT)
 
                     window.blit(self.peach, camera.apply(self.peach_collider))
+
+
+    def get_peach_position(self):
+        """ The get_peach_position method is responsible for finding the position of the peach sprite in the map.
+            It iterates over the map list and returns the position of the peach sprite.
+
+            Returns:
+                - tuple: The position of the peach sprite (x, y)
+        """
+        for row_index, row in enumerate(self.map):
+            for column_index, floor_block__index in enumerate(row):
+                if floor_block__index is PEACH_SPRITE_PATH:
+                    x, y = column_index * FLOOR_TILE_WIDTH, row_index * FLOOR_TILE_HEIGHT
+                    return (x, y)
+        return None

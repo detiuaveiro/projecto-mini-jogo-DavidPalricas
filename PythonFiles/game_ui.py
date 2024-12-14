@@ -47,7 +47,7 @@ class UI:
         self._initialized = True
         self.score = 0
         self.time = GAME_TIME
-        self.font  = pg.font.Font(os.path.join(os.path.dirname(__file__), FONT_PATH ),  FONT_SIZE)
+        self.font  = pg.font.Font(os.path.join(os.path.dirname(__file__), FONT_PATH ), FONT_SIZE)
         self.score_text_color =  COLORS["WHITE"]
         self.timer_text_color =  COLORS["WHITE"]
 
