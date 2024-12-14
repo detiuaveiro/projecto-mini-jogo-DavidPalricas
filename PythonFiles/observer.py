@@ -1,7 +1,7 @@
 import pygame as pg
-import sound_player as sp
 import os
-from consts import GAME_TIME, ALERT_TIME, TIMEOUT, GAME_SECOND
+from consts import GAME_TIME, ALERT_TIME, TIMEOUT, GAME_SECOND, GAME_EVENTS
+
 
 class Observer:
  """The Score class acts as game observer, because to update the score it needs to listen to the game events.
@@ -10,9 +10,6 @@ class Observer:
       Attributes:
          - player (Player): The player object.
          - game_map (GameMap): The game map object.
-         - music_player (SoundPlayer): The music player object.
-         - sound_effecter (SoundPlayer): The sound effecter object.
-         - player_sound_effecter (SoundPlayer): The sound effecter object for  the player sound effects.
          - score (int): The score of the player.
          - time (int): The time left in the game.
          - font (Font): The font object used for rendering the text on the screen
@@ -29,10 +26,6 @@ class Observer:
     self.enemies = enemies
 
 
-    self.music_player = sp.SoundPlayer(["overworld_theme"], True)
-    self.music_player.play("overworld_theme")
-
-    self.sound_effecter = sp.SoundPlayer(["jump","break_block","time_warning"], False)
 
     self.score = 0
     self.time = GAME_TIME
@@ -40,16 +33,6 @@ class Observer:
     font_path = os.path.join(os.path.dirname(__file__), "../Assets/Font/mario_nes.ttf")
     self.font = pg.font.Font(font_path, 12)
 
-   
- def listener(self):
-    """ The listener function listens to the game events
-        For now this method only listens to the player's collisions with the blocks in the game map, by calling the check_collisions method and plays the sound effect when the player jumps.
-    
-    """
-    self.check_collisions()
-    
-    if self.player.fsm.current == self.player.jump:
-        self.sound_effecter.play("jump")
 
  def check_collisions(self):
    """ The check_collision function checks if the player has collided with any of the blocks in the game map.
@@ -124,13 +107,15 @@ class Observer:
     timer_label = self.font.render(f"{self.time:03}", True, (255, 255, 255))
 
     if self.time == ALERT_TIME:
-       self.sound_effecter.play("time_warning")
+       print(self.time)
+
+       pg.event.post(pg.event.Event(GAME_EVENTS["TIME_ALERT_EVENT"]))
 
     elif self.time <= ALERT_TIME and self.time > TIMEOUT:
          timer_label = self.font.render(f"{self.time:03}", True, (255, 0, 0))
 
     elif self.time == TIMEOUT:
-         self.music_player.stop()
+         pg.event.post(pg.event.Event("TIMEOUT_EVENT"))
          
     window.blit(time_label, (700, 10))
     window.blit(timer_label, (705, 25))
