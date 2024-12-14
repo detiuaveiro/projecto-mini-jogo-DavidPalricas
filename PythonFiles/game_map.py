@@ -66,6 +66,7 @@ class Map:
         ]
 
         self.floor_blocks_colliders = []
+        self.peach_collider = None
         self._initialized = True
 
     def draw(self, window, camera):
@@ -92,6 +93,6 @@ class Map:
                 elif floor_block__index is PEACH_SPRITE_PATH:
                     x, y = column_index * FLOOR_TILE_WIDTH, row_index * FLOOR_TILE_HEIGHT
 
-                    peach_collider = pg.Rect(x, y, FLOOR_TILE_WIDTH, FLOOR_TILE_HEIGHT)
+                    self.peach_collider = pg.Rect(x, y, FLOOR_TILE_WIDTH, FLOOR_TILE_HEIGHT)
 
-                    window.blit(self.peach, camera.apply(peach_collider))
+                    window.blit(self.peach, camera.apply(self.peach_collider))

@@ -1,14 +1,54 @@
 import pygame as pg
-import game_map as gm
+import finite_state_machine as fsm
+from game_map import Map
 from player import Player
 from kirby import Kirby
 from observer import Observer
 from sound_player import SoundPlayer
 from camera import Camera
 from consts import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, GAME_SECOND, GAME_EVENTS
+from game_ui import UI
 
+class Game :
+    _instance = None
 
-def update_display(all_sprites, window, game_map, observer, game_time, camera):
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(Game, cls).__new__(cls)
+            cls._instance.__initialized = False
+
+        return cls._instance
+    
+    def __init__(self) -> None:
+
+        if not hasattr(self, 'initialized'):
+            self.window, self.clock = self.setup_pygame()
+            self.map = Map()
+            self.fsm = fsm.FSM(self.set_states(), self.set_transitions())
+            self.initialized = True
+
+    def setup_pygame(self):
+        pg.init()
+        window = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        pg.display.set_caption("Super Bowser")
+        clock = pg.time.Clock()
+
+        return window, clock
+    
+
+    def set_states(self):
+        self.playing = fsm.Playing()
+        self.game_over = fsm.GameOver()
+
+        return [self.playing, self.game_over]
+    
+
+    def set_transitions(self):
+        return {
+            "game_over": fsm.Transition(self.playing, self.game_over)
+        }
+
+def update_display(all_sprites, window, game_map, game_ui, camera):
     """
     The update_display function is responsible for updating the display of the game, drawing the game map, and updating the sprites.
 
@@ -16,7 +56,9 @@ def update_display(all_sprites, window, game_map, observer, game_time, camera):
         - all_sprites: The group of all the sprites in the game.
         - window: The game window object.
         - game_map: The game map object.
+        - game_ui: The game UI object.
         - game_time: The time elapsed in the game.
+        - camera: The camera object used to center on the player.
     """
     
     # Clears the screen
@@ -29,12 +71,12 @@ def update_display(all_sprites, window, game_map, observer, game_time, camera):
     for sprite in all_sprites:
         window.blit(sprite.image, camera.apply(sprite))
 
-    observer.draw_ui_labels(window, game_time)
+    game_ui.draw_labels(window)
     
     # Updates the display
     pg.display.flip()
 
-def event_handler(running, audio_players):
+def event_handler(running, audio_players, all_sprites):
     """ The event_handler function is responsible for handling the events in the game, such as quitting the game.
         
         Args:
@@ -48,107 +90,140 @@ def event_handler(running, audio_players):
 
     """
 
-    for event in pg.event.get():
-        
-        if event.type == pg.QUIT:
+    for event in pg.event.get():  
+        if event.type == pg.QUIT :
             running = False
+
         elif event.type == GAME_EVENTS["QUIT_GAME_EVENT"]:
             print("Quit game event triggered")
+
             running = False
-        elif event.type == GAME_EVENTS["PLAYER_DEATH_EVENT"]:
-            print("Player has died")
-            # Handle player death
+
+        elif event.type == GAME_EVENTS["PLAYER_DEATH_EVENT"]: 
+
+            audio_players[1].play("bowser_death")
+            player = next(sprite for sprite in all_sprites if isinstance(sprite, Player))
+            player.respawn()
+
+            game_ui = UI()
+            game_ui.update_score(-50)
+
         elif event.type == GAME_EVENTS["TIMEOUT_EVENT"]:
+
+            game = Game()
+            game.fsm.update("game_over", game)
+
             # Stop the music player
             audio_players[0].stop()
-            print("Timeout occurred")
-            # Handle timeout
+
+            audio_players[1].play("game_over")
         elif event.type == GAME_EVENTS["TIME_ALERT_EVENT"]:
             # Play time warning sound effect
-            audio_players[1].play("time_warning")
-            print("Time alert")
+            game_ui = UI()
+            game_ui.change_timer_text_color()
 
-            # Handle time alert
-        elif event.type == GAME_EVENTS["JUMP_EVENT"]:
-            print("Player jumped")
-            # Handle jump (play sound effect)
+            audio_players[1].play("time_warning")
+
+        elif event.type == GAME_EVENTS["PLAYER_JUMP_EVENT"]:
+            audio_players[1].play("jump")
+
         elif event.type == GAME_EVENTS["END_GAME_EVENT"]:
             print("End of game")
-            # Handle end of game
-        elif event.type == GAME_EVENTS["ENEMY_DEATH_EVENT"]:
-            print("Enemy has died")
-            # Handle enemy death
 
-    return running
+        elif event.type == GAME_EVENTS["ENEMY_KILLED_EVENT"]:
+            audio_players[1].play("enemy_killed")
+
+            for sprite in all_sprites:
+                if isinstance(sprite, Kirby) and sprite.dead: 
+                    all_sprites.remove(sprite)
+            
+            game_ui = UI()
+            game_ui.update_score(100)
+  
+    return running, all_sprites
+
+
+def get_audio_players():
+    """ The get_audio_players function is responsible for creating the audio player objects for the background music and sound effects.
+        
+        Returns:
+            - audio_players: A list of audio player objects.
+    """
+
+    music_player = SoundPlayer(["overworld_theme", "game_over"], True)
+    music_player.play("overworld_theme")
+
+    sound_effecter = SoundPlayer(["jump","bowser_death","time_warning", "enemy_killed"], False)
+
+    return [music_player, sound_effecter]
    
-def game_loop(all_sprites, window, clock, game_map):
+def game_loop(game):
     """ The game_loop function is responsible for running the game loop, updating the display, and handling events.
          It also checks if the player has fallen off the map and resets the player's position if needed.
          The function also plays the background music for the game and stops it when some event forces the game to stop.
 
          Args:
-            - all_sprites: The group of all the sprites in the game.
             - window: The game window object.
             - clock: The game clock object used for controlling the frame rate.
             - game_map: The game map object.
     """
-
+    
     running = True
+
+
+    window , clock , game_map = game.window, game.clock, game.map
+
+
+    all_sprites = setup_sprites()  
 
     # Get the player object from all_sprites
     player = next(sprite for sprite in all_sprites if isinstance(sprite, Player)) 
-    kirby = next(sprite for sprite in all_sprites if isinstance(sprite, Kirby))
+
     camera = Camera(SCREEN_WIDTH, SCREEN_HEIGHT)
 
-    enemies = [kirby]   
- 
-    observer = Observer(player, game_map, enemies)
+    observer = Observer()
 
-    music_player = SoundPlayer(["overworld_theme"], True)
-    music_player.play("overworld_theme")
+    audio_players = get_audio_players()
 
-    sound_effecter = SoundPlayer(["jump","break_block","time_warning"], False)
-    audio_players = [music_player, sound_effecter]
+    delta_time = 0
 
-    game_time = 0
+    game_ui = UI()
 
     while running:
-        running = event_handler(running, audio_players)
-        
-        # Update player position
-        all_sprites.update()
-        
-        camera.update(player)
-        
-        # Check if player has fallen off the map
-        if player.rect.y > SCREEN_HEIGHT:
-            pg.event.post(pg.event.Event(GAME_EVENTS["PLAYER_DEATH_EVENT"]))
-            player.rect.x = 0
-            player.rect.y = 235
 
-        if len(enemies) > 0:
-            for enemy in enemies:
-                if enemy.dead:
-                    pg.event.post(pg.event.Event(GAME_EVENTS["ENEMY_DEATH_EVENT"]))
-                    observer.enemies = [enemies for enemies in observer.enemies if enemies.dead == False]
-                    enemies.remove(enemy)
-                    all_sprites.remove(enemy)
+        if game.fsm.current == game.playing:
+            running, all_sprites= event_handler(running, audio_players, all_sprites)
+            
+            # Update player position
+            all_sprites.update()
+            
+            camera.update(player)
 
-        game_time += clock.tick(FPS)
+            delta_time += clock.tick(FPS)
 
-        if game_time <= 0:
-            pg.event.post(pg.event.Event(GAME_EVENTS["TIMEOUT_EVENT"]))
-            running = False
+            observer.observe(all_sprites)
 
-        observer.check_collisions()
+            update_display(all_sprites, window, game_map, game_ui, camera)
 
-        if not player.is_on_ground:
-            pg.event.post(pg.event.Event(GAME_EVENTS["JUMP_EVENT"]))
-        
-        update_display(all_sprites, window, game_map, observer, game_time, camera)
+            if delta_time >= GAME_SECOND:
+                
+                game_ui.update_timer()
 
-        if game_time >= GAME_SECOND:
-            game_time -= GAME_SECOND
+                game_time = game_ui.time
+
+                observer.observe_time_envents(game_time)
+
+                delta_time -= GAME_SECOND
+
+        elif game.fsm.current == game.game_over:
+
+            all_sprites.empty()
+
+            window.fill((0,0,0))
+
+            pg.display.flip()
+
+            pass
 
     pg.quit()
 
@@ -172,31 +247,19 @@ def setup_sprites():
 
     return all_sprites
 
-def setup_pygame():
-    """ The setup function for the pygame module, sets up the window and clock for the game.
-
-        Returns:
-            - window: The game window object.
-            - clock: The game clock object used for controlling the frame rate.
-    """
-    pg.init()
-    window = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pg.display.set_caption("Super Bowser")
-    clock = pg.time.Clock()
-
-    return window, clock
 
 def main():
     """ The main function of the game, sets up the pygame, creates the game map and sprites, and also runs the game loop.
     """
-    window, clock = setup_pygame()
 
-    game_map = gm.Map()
     #camera = game_map.get_camera()  # Commented out
 
-    all_sprites = setup_sprites()  
-
-    game_loop(all_sprites, window, clock, game_map)
+    game = Game()
+    game_loop(game)
 
 if __name__ == "__main__":
     main()
+
+
+
+    

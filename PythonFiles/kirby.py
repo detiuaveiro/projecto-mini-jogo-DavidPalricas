@@ -28,7 +28,7 @@ class Kirby(Entity):
          # Initialize FSM and states
         self.fsm = fsm.FSM(self.set_states(), self.set_transitions())
 
-
+   
     def set_states(self):
         """ The set_states method is responsible for setting the states of the kirby e.g. (idle, walk, jump)
             Returns:
@@ -85,3 +85,5 @@ class Kirby(Entity):
                 
             self.fsm.update("idle", self)
             
+
+  

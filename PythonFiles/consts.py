@@ -2,18 +2,14 @@ import pygame as pg
 
 
 # Game Event Constants
-PLAYER_DEATH_EVENT = pg.USEREVENT + 1
-TIMEOUT_EVENT = pg.USEREVENT + 2
-TIME_ALERT_EVENT = pg.USEREVENT + 3
-JUMP_EVENT = pg.USEREVENT + 4
-END_GAME_EVENT = pg.USEREVENT + 5
-ENEMY_DEATH_EVENT = pg.USEREVENT + 6
-QUIT_GAME_EVENT = pg.USEREVENT + 7 
-
-
-GAME_EVENTS = {"QUIT_GAME_EVENT": QUIT_GAME_EVENT, "PLAYER_DEATH_EVENT": PLAYER_DEATH_EVENT, "TIMEOUT_EVENT": TIMEOUT_EVENT, "TIME_ALERT_EVENT": TIME_ALERT_EVENT, "JUMP_EVENT": JUMP_EVENT, "END_GAME_EVENT": END_GAME_EVENT, "ENEMY_DEATH_EVENT": ENEMY_DEATH_EVENT}
-
-
+GAME_EVENTS = {"QUIT_GAME_EVENT": pg.USEREVENT + 1, 
+               "PLAYER_DEATH_EVENT": pg.USEREVENT + 2, 
+               "TIMEOUT_EVENT": pg.USEREVENT + 3, 
+               "TIME_ALERT_EVENT": pg.USEREVENT + 4, 
+               "PLAYER_JUMP_EVENT": pg.USEREVENT + 5, 
+               "END_GAME_EVENT": pg.USEREVENT + 6, 
+               "ENEMY_KILLED_EVENT": pg.USEREVENT + 7 
+               }
 
 # Screen SIze Constants
 SCREEN_WIDTH = 800
@@ -27,8 +23,8 @@ FLOOR_BLOCK_SPRITE_PATH = "../Assets/SpriteSheets/Map/floor_block.png"
 PEACH_SPRITE_PATH = "../Assets/SpriteSheets/Peach/peach.png"
 
 # Time Constants
-GAME_TIME = 93
-ALERT_TIME = 90
+GAME_TIME = 60
+ALERT_TIME = 20
 TIMEOUT = 0
 GAME_SECOND = 1000
 
@@ -47,3 +43,9 @@ PLAYER_IDLE_SPRITE_PATH = "../Assets/SpriteSheets/Bowser/idle/bowser_idle.png"
 KIRBY_IDLE_SPRITE_PATH = "../Assets/SpriteSheets/Enemies/Kirby/idle/kirby_idle.png"
 KIRBY_SPEED = 1.2
 KIRBY_PATROL_MAX_DISTANCE = 100
+
+
+# UI Constants
+FONT_PATH = "../Assets/Font/mario_nes.ttf"
+FONT_SIZE = 12
+COLORS = {"WHITE": (255, 255, 255), "RED": (255, 0, 0)}

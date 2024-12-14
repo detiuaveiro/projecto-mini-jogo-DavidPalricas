@@ -5,7 +5,7 @@ import os
 from inputHandler import InputHandler 
 from command import MoveRightCommand, MoveLeftCommand, JumpCommand, SprintCommand
 from consts import PLAYER_SPEED, PLAYER_JUMP_SPEED, GRAVITY, PLAYER_FRICTION, SPRINT_SPEED, PLAYER_JUMP_SPEED_SPRINT, PLAYER_IDLE_SPRITE_PATH
-from camera import Camera
+
 
 class Player(Entity):
     """
@@ -123,7 +123,8 @@ class Player(Entity):
             self.fsm.update("idle", self)
 
 
-        self.rect.x += self.velocity_x
+        self.rect.x += self.velocity_x  if self.rect.x + self.velocity_x > 0 else 0
+
         self.rect.y += self.velocity_y
 
     def move_right(self):
@@ -168,7 +169,6 @@ class Player(Entity):
          
         if self.velocity_y > 0:    
             self.fsm.update("fall", self)
-      
 
     def sprint(self):
         """ The sprint method is responsible for making the player sprint if the player is walking.
@@ -179,6 +179,12 @@ class Player(Entity):
 
         elif self.fsm.current == self.jump:
             self.velocity_y = -PLAYER_JUMP_SPEED_SPRINT
+
+
+    def respawn(self):
+        """ The respawn method is responsible for respawning the player at the starting position"""
+        self.rect.x = 0
+        self.rect.y = 235
 
     def quit_game(self):
         """ The quit_game method is responsible for quitting the game"""

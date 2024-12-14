@@ -114,6 +114,54 @@ class Jump(State):
         print("Jumping")
         return super().update(object)
     
+class Playing(State):
+    """The Playing class is responsible for managing the playing state of the entity """
+
+    def __init__(self) -> None:
+        """ Initializes a new instance of the Playing class, and calls the constructor of the State class (the parent class) """
+
+        super().__init__(self.__class__.__name__)
+
+    def update(self, object):
+        """The update method is responsible for updating the playing state of the entity
+
+            Args:
+                - object (Entity): The entity that the state belongs to
+
+            Returns:
+                 - bool: A flag indicating to update the entity state
+        """
+
+        print("Game Playing")
+        return super().update(object)
+        
+
+class GameOver(State):
+        """The GameOver class is responsible for managing the game over state of the entity
+        """
+
+        def __init__(self) -> None:
+            """ 
+                Initializes a new instance of the GameOver class, and calls the constructor of the State class (the parent class)
+            """
+
+            super().__init__(self.__class__.__name__)
+
+        def update(self, object):
+            """The update method is responsible for updating the game over state of the entity
+
+                Args:
+                    - object (Entity): The entity that the state belongs to
+
+                Returns:
+                    - bool: A flag indicating to update the entity state
+            """
+
+            print("Game Over")
+            return super().update(object)
+    
+
+    
 
 class FSM:
     """The FSM class is responsible for managing the finite state machine of the entity

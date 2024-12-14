@@ -1,7 +1,8 @@
 import pygame as pg
-import os
-from consts import GAME_TIME, ALERT_TIME, TIMEOUT, GAME_SECOND, GAME_EVENTS
-
+from consts import ALERT_TIME, TIMEOUT, GAME_EVENTS, SCREEN_HEIGHT, PLAYER_JUMP_SPEED
+from player import Player
+from kirby import Kirby
+from game_map import Map
 
 class Observer:
  """The Score class acts as game observer, because to update the score it needs to listen to the game events.
@@ -10,122 +11,118 @@ class Observer:
       Attributes:
          - player (Player): The player object.
          - game_map (GameMap): The game map object.
-         - score (int): The score of the player.
-         - time (int): The time left in the game.
-         - font (Font): The font object used for rendering the text on the screen
+         - enemies (list): The list of enemy sprites.
  """
- def __init__(self,player,game_map,enemies) -> None:
-    """ Initializes a new instance of the Score class and sets up the attributes of the class.
 
-         Args:
-            - player (Player): The player object.
-            - game_map (GameMap): The game map object.
+ def __init__(self) -> None:
+    """ Initializes a new instance of the Observer class and sets up the attributes of the class.
     """
-    self.player = player
-    self.game_map = game_map
-    self.enemies = enemies
+    self.player = None  
+    self.game_map = Map()
+    self.enemies = None
 
-
-
-    self.score = 0
-    self.time = GAME_TIME
-     
-    font_path = os.path.join(os.path.dirname(__file__), "../Assets/Font/mario_nes.ttf")
-    self.font = pg.font.Font(font_path, 12)
-
-
- def check_collisions(self):
+ def observe(self, all_sprites):	
    """ The check_collision function checks if the player has collided with any of the blocks in the game map.
 
       For now this method only checks if the player has collided with the brick blocks and question blocks in the game map, when the player is below the block.
       If the player has collided with a brick block, it breaks the block and adds 50 points to the player's score.
       If the player has collided with a question block, it replaces the block with a used question block.
+
+
+      Args:
+         - all_sprites (Group): The group of all the sprites in the game.
    """
 
-   if self.player.rect.collidelist(self.game_map.floor_blocks_colliders) != -1:
-      block_index = self.player.rect.collidelist(self.game_map.floor_blocks_colliders)
-      block = self.game_map.floor_blocks_colliders[block_index]
-   
-      if self.player.velocity_y > 0  and self.player.rect.bottom > block.top and self.player.rect.top < block.top:
-   
-        self.player.rect.bottom = block.top 
+   if self.player is None:
+      self.player = next(sprite for sprite in all_sprites if isinstance(sprite, Player))
 
-        self.player.on_block = None
+   enemies = [sprite for sprite in all_sprites if isinstance(sprite, Kirby)]
+
+   
+   self.observe_player_jumped()
+
+   self.observe_player_in_void()
+
+   self.check_endgame()
+
+   self.observe_floor_collisions()
+
+   if len(enemies) > 0:
+      self.observe_enemy_collision(enemies)
+
+
+ def observe_player_jumped(self):
+   """ The observe_player_jumped method checks if the player has jumped in the game, if it has, it posts an event of player jump.""" 
+   # Check if the player has jumped
+   if self.player.velocity_y == -PLAYER_JUMP_SPEED:
+      pg.event.post(pg.event.Event(GAME_EVENTS["PLAYER_JUMP_EVENT"]))
+    
+
+
+ def observe_player_in_void(self):
+   """ The observe_player_in_void method checks if the player has fallen into the void in the game map, if it has, it posts an event of player death.""" 
+
+   if self.player.rect.y > SCREEN_HEIGHT:
+      pg.event.post(pg.event.Event(GAME_EVENTS["PLAYER_DEATH_EVENT"]))
+
+
+ def observe_time_envents(self, game_time):  
+   """ The observe_time method checks if the game time is equal to the alert time or the timeout time, and posts the corresponding event."""   
+
+   if game_time == ALERT_TIME:
+      pg.event.post(pg.event.Event(GAME_EVENTS["TIME_ALERT_EVENT"]))
+     
+   if game_time <= TIMEOUT:
+      pg.event.post(pg.event.Event(GAME_EVENTS["TIMEOUT_EVENT"]))
   
-        self.player.velocity_y = 0
+
+ def check_endgame(self):
+    """ The check_endgame method checks if the player has collided with the peach sprite in the game map, if it has, it posts an event to end the game."""
+
+    if self.game_map.peach_collider is not None  and self.player.rect.colliderect(self.game_map.peach_collider):
+      pg.event.post(pg.event.Event(GAME_EVENTS["END_GAME_EVENT"]))
    
-        self.player.is_on_ground = True
 
-   else:
-          self.player.is_on_ground = False
+ def observe_floor_collisions(self):
+    """ The observe_floor_collisions method checks if the player has collided with any of the floor blocks in the game map.
+         If the player has collided with a floor block, it sets the player's velocity_y to 0 and sets the player's is_on_ground attribute to True.
+         Otherwise, it sets the player's is_on_ground attribute to False (the player is in the air).
+    """
 
+    floor_block_index = self.player.rect.collidelist(self.game_map.floor_blocks_colliders)
+
+    if floor_block_index != -1:
+      block = self.game_map.floor_blocks_colliders[floor_block_index]
+      
+      # Check if the player is above the block
+      if self.player.velocity_y > 0  and self.player.rect.bottom > block.top and self.player.rect.top < block.top:
+         self.player.rect.bottom = block.top 
+
+         self.player.on_block = None
    
-   enemies_colliders = [enemy.rect for enemy in self.enemies]
-   if self.player.rect.collidelist(enemies_colliders) != -1:
+         self.player.velocity_y = 0
+      
+         self.player.is_on_ground = True
+    else:
+         self.player.is_on_ground = False
+  
+ def observe_enemy_collision(self, enemies):
+      """ The observe_enemy_collision method checks if the player has collided with any of the enemies in the game.
+            If the player has collided with an enemy, it checks if the player is above the enemy.
+            If the player is above the enemy, it posts an event to kill the enemy otherwise the player dies and posts and event of player death.
+      """
 
-      enemy = self.enemies[self.player.rect.collidelist(enemies_colliders)]
+      enemies_colliders = [enemy.rect for enemy in enemies]
+      enemy_collider_index = self.player.rect.collidelist(enemies_colliders)
 
-      kirby_collider = enemies_colliders[self.player.rect.collidelist(enemies_colliders)]
+      if enemy_collider_index != -1:
+         enemy = enemies[enemy_collider_index]
 
+         kirby_collider = enemies_colliders[enemy_collider_index]
 
-      if self.player.rect.bottom >= kirby_collider.top and  not self.player.is_on_ground:
-         enemy.dead = True
-
-      else:
-         self.player.rect.x = 0
-         self.player.rect.y = 235
-         self.score -= 100
-
- def draw_score_label(self,window):
-    """ The draw_score_label function is responsible for drawing the score label on the screen.
-
-         Args:
-            - window (Surface): The game window object.
-    """
-
-    player_text = self.font.render("Bowser", True, (255,255,255))
-    score_label = self.font.render(f"{self.score:07}", True, (255, 255, 255))
-
-    window.blit(player_text, (10, 10))
-    window.blit(score_label, (10, 25))
-
-
- def draw_timer_label(self,window, delta_time):
-    """ The draw_timer_label function is responsible for drawing the timer label on the screen after 1 second has passed.
-        It also changes the color of the timer label when the time is running out, and plays a warning sound effect and the version of the music speed up.
-        It stops the music player and decremeting the time when the time is up.
-
-         Args:
-            - window (Surface): The game window object.
-            - delta_time (int): The time elapsed since the last frame.
-    """
- 
-    if self.time > TIMEOUT and delta_time >= GAME_SECOND :
-        self.time -= 1
-
-    time_label = self.font.render(f"TIME", True, (255, 255, 255))
-    timer_label = self.font.render(f"{self.time:03}", True, (255, 255, 255))
-
-    if self.time == ALERT_TIME:
-       print(self.time)
-
-       pg.event.post(pg.event.Event(GAME_EVENTS["TIME_ALERT_EVENT"]))
-
-    elif self.time <= ALERT_TIME and self.time > TIMEOUT:
-         timer_label = self.font.render(f"{self.time:03}", True, (255, 0, 0))
-
-    elif self.time == TIMEOUT:
-         pg.event.post(pg.event.Event("TIMEOUT_EVENT"))
-         
-    window.blit(time_label, (700, 10))
-    window.blit(timer_label, (705, 25))
-
- def draw_ui_labels(self,window,delta_time):
-    """ The draw_ui_labels function is responsible for calling the methods to draw the score and timer labels on the screen.
-
-         Args:
-            - window (Surface): The game window object.
-            - delta_time (int): The time elapsed since the last frame.
-    """
-    self.draw_score_label(window)
-    self.draw_timer_label(window,delta_time)
+         if self.player.rect.bottom >= kirby_collider.top and  not self.player.is_on_ground:
+            pg.event.post(pg.event.Event(GAME_EVENTS["ENEMY_KILLED_EVENT"]))
+            enemy.dead = True
+         else:
+            pg.event.post(pg.event.Event(GAME_EVENTS["PLAYER_DEATH_EVENT"]))
+    
