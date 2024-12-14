@@ -2,8 +2,7 @@ import pygame as pg
 from entity import Entity
 import finite_state_machine as fsm
 import os
-from inputHandler import InputHandler 
-from command import MoveRightCommand, MoveLeftCommand, JumpCommand, SprintCommand
+from command import MoveRightCommand, MoveLeftCommand, JumpCommand, SprintCommand, InputHandler
 from consts import PLAYER_SPEED, PLAYER_JUMP_SPEED, GRAVITY, PLAYER_FRICTION, SPRINT_SPEED, PLAYER_JUMP_SPEED_SPRINT, PLAYER_IDLE_SPRITE_PATH
 
 
