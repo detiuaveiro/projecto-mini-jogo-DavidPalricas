@@ -1,4 +1,4 @@
-import pygame
+import pygame as pg
 
 class Camera:
     _instance = None
@@ -11,14 +11,14 @@ class Camera:
     def __init__(self, width, height):
         """Initialize camera"""
         if not hasattr(self, 'initialized'):  # Ensure __init__ is only called once
-            self.camera = pygame.Rect(0, 0, width, height)
+            self.camera = pg.Rect(0, 0, width, height)
             self.width = width
             self.height = height
             self.initialized = True
 
     def apply(self, entity):
         """Apply camera offset to an entity"""
-        if isinstance(entity, pygame.Rect):
+        if isinstance(entity, pg.Rect):
             return entity.move(self.camera.topleft)
         return entity.rect.move(self.camera.topleft)
 
@@ -42,4 +42,4 @@ class Camera:
         x = max(-(map_width - self.width), x)  # Right boundary
         y = max(-(map_height - self.height), y)  # Bottom boundary
 
-        self.camera = pygame.Rect(x, y, self.width, self.height)
+        self.camera = pg.Rect(x, y, self.width, self.height)

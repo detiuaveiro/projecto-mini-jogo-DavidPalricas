@@ -1,7 +1,7 @@
 import pygame as pg
 import os
 
-from consts import FLOOR_TILE_WIDTH, FLOOR_TILE_HEIGHT, FLOOR_BLOCK, FLOOR_BLOCK_SPRITE_PATH
+from consts import FLOOR_TILE_WIDTH, FLOOR_TILE_HEIGHT, FLOOR_BLOCK, FLOOR_BLOCK_SPRITE_PATH, PEACH_SPRITE_PATH
 
 class Map:
     """ The Map class is responsible for creating the game map and drawing it on the screen.
@@ -46,6 +46,7 @@ class Map:
             return
         
         self.floor_block_sprite = pg.image.load(os.path.join(os.path.dirname(__file__), FLOOR_BLOCK_SPRITE_PATH)).convert_alpha()
+        self.peach = pg.image.load(os.path.join(os.path.dirname(__file__), PEACH_SPRITE_PATH)).convert_alpha()
 
         self.map = [[],
                     [],
@@ -60,8 +61,8 @@ class Map:
                     [None] * 60 + [FLOOR_BLOCK] * 10,
                     [None] * 47 + [FLOOR_BLOCK] * 10 + [None] * 16 + [FLOOR_BLOCK] * 10,
                     [None] * 34 + [FLOOR_BLOCK] * 10,
-                    [],
-                    [FLOOR_BLOCK] * 31,
+                    [None] * 100 + [PEACH_SPRITE_PATH],
+                    [FLOOR_BLOCK] * 31 + [None] * 69 + [FLOOR_BLOCK] * 5,
         ]
 
         self.floor_blocks_colliders = []
@@ -87,3 +88,10 @@ class Map:
                     self.floor_blocks_colliders.append(floor_block_collider)
 
                     window.blit(self.floor_block_sprite, camera.apply(floor_block_collider))
+
+                elif floor_block__index is PEACH_SPRITE_PATH:
+                    x, y = column_index * FLOOR_TILE_WIDTH, row_index * FLOOR_TILE_HEIGHT
+
+                    peach_collider = pg.Rect(x, y, FLOOR_TILE_WIDTH, FLOOR_TILE_HEIGHT)
+
+                    window.blit(self.peach, camera.apply(peach_collider))

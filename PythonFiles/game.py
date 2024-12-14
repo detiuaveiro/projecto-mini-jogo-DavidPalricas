@@ -25,15 +25,9 @@ def update_display(all_sprites, window, game_map, observer, game_time, camera):
     # Update camera to center on player
     game_map.draw(window, camera)
 
-    player = next(sprite for sprite in all_sprites if isinstance(sprite, Player))
-
-    # Draw the player with the camera offset
-    window.blit(player.image, camera.apply(player))
-
-    # Draw other sprites without the camera offset
+    # Draw all sprites with the camera offset
     for sprite in all_sprites:
-        if not isinstance(sprite, Player):
-            window.blit(sprite.image, sprite.rect)
+        window.blit(sprite.image, camera.apply(sprite))
 
     observer.draw_ui_labels(window, game_time)
     
@@ -65,7 +59,6 @@ def event_handler(running, audio_players):
             print("Player has died")
             # Handle player death
         elif event.type == GAME_EVENTS["TIMEOUT_EVENT"]:
-             
             # Stop the music player
             audio_players[0].stop()
             print("Timeout occurred")
@@ -115,8 +108,6 @@ def game_loop(all_sprites, window, clock, game_map):
     music_player.play("overworld_theme")
 
     sound_effecter = SoundPlayer(["jump","break_block","time_warning"], False)
-
-
     audio_players = [music_player, sound_effecter]
 
     game_time = 0
