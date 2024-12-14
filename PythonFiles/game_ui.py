@@ -73,6 +73,10 @@ class UI:
 
         self.score  = self.score + points if self.score + points > 0 else 0
 
+    def reset_labels_values(self):
+        self.time = GAME_TIME
+        self.timer_text_color = COLORS["WHITE"]
+        self.score = 0
 
 
     def update_timer(self):
