@@ -73,25 +73,29 @@ class Game:
 
     def setup_sprites(self):
         all_sprites = pg.sprite.Group()
-
-        player = Player((0,235,25,31)) 
+    
+        player = Player((0, 235, 25, 31))
         all_sprites.add(player)
-
-        kirby = Kirby((150, 252, 18, 20))
-        all_sprites.add(kirby)
-
-        kirby2 = Kirby((350, 252, 18, 20))
+    
+        original_kirby = Kirby((150, 252, 18, 20))
+        all_sprites.add(original_kirby)
+    
+        kirby2 = original_kirby.clone()
+        kirby2.rect.topleft = (350, 252)
         all_sprites.add(kirby2)
-
-        kirby3 = Kirby((570, 195, 18, 20))
+    
+        kirby3 = original_kirby.clone()
+        kirby3.rect.topleft = (570, 195)
         all_sprites.add(kirby3)
-
-        kirby4 = Kirby((770, 138, 18, 20))
+    
+        kirby4 = original_kirby.clone()
+        kirby4.rect.topleft = (770, 138)
         all_sprites.add(kirby4)
-
-        kirby5 = Kirby((1000, 195, 18, 20))
+    
+        kirby5 = original_kirby.clone()
+        kirby5.rect.topleft = (1000, 195)
         all_sprites.add(kirby5)
-        
+    
         return all_sprites
     
     def setup_game_level(self):

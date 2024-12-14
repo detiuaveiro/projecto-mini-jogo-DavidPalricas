@@ -1,89 +1,88 @@
-from entity import Entity
-import finite_state_machine as fsm
-import pygame as pg
 import os
+import copy
+import pygame as pg
+import finite_state_machine as fsm
+from entity import Entity
 from consts import KIRBY_IDLE_SPRITE_PATH, KIRBY_SPEED, KIRBY_PATROL_MAX_DISTANCE
 
 class Kirby(Entity):
-    
     def __init__(self, collider): 
         """
-            Initializes a new instance of the Kirby class, and calls the constructor of the Entity class (the parent
-       """
-        
+        Initializes a new instance of the Kirby class, calling the Entity and Prototype constructors.
+        """
         sprite_path = os.path.join(os.path.dirname(__file__), KIRBY_IDLE_SPRITE_PATH)
-        
         super().__init__(sprite_path, collider)
 
-        # Set up the kirby's attributes
+        # Set up Kirby's attributes
         self.walked_distance = 0
-           
-        # Set up the atrributes inherited from the Entity class
         self.speed = KIRBY_SPEED
         self.turned_right = True
         self.name = "Kirby"
-
         self.dead = False
-        
-         # Initialize FSM and states
+
+        # Initialize FSM and states
         self.fsm = fsm.FSM(self.set_states(), self.set_transitions())
 
-   
+    def clone(self):
+        """
+        Creates a deep copy of the current instance.
+        Returns:
+            A new instance that is a clone of the current object.
+        """
+        return copy.deepcopy(self)
+
+    def __deepcopy__(self, memo):
+        """
+        Custom deepcopy method to handle pygame.Surface objects.
+        """
+        # Create a new instance of Kirby
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+
+        # Copy attributes
+        for k, v in self.__dict__.items():
+            if k == 'image':
+                # Manually copy the pygame.Surface object
+                result.__dict__[k] = self.image.copy()
+            else:
+                result.__dict__[k] = copy.deepcopy(v, memo)
+        
+        return result
+    
     def set_states(self):
-        """ The set_states method is responsible for setting the states of the kirby e.g. (idle, walk, jump)
-            Returns:
-                - states (list): A list of the kirby's states
-         """
+        """Sets Kirby's FSM states."""
         self.idle = fsm.Idle()
         self.walk = fsm.Walk()
-
         return [self.idle, self.walk]
     
     def set_transitions(self):
-        """ The set_transitions method is responsible for setting the transitions between the kirby's states
-            Returns:
-                - transitions (list): A list of the kirby's transitions
-        """
+        """Sets Kirby's FSM transitions."""
         return {
-            "walk": fsm.Transition(self.idle, self.walk,),
+            "walk": fsm.Transition(self.idle, self.walk),
             "idle": fsm.Transition(self.walk, self.idle)
         }
     
     def update(self):
-        """ The update method is responsible for updating the kirby's FSM
-        """
-
+        """Updates Kirby's FSM and handles animations."""
         self.patrol()
-
         self.animator.play_animation(self.fsm.current.name, self)
-
-
+    
     def patrol(self):
+        """Handles Kirby's patrol behavior."""
         if self.turned_right:
-
             if self.fsm.current == self.idle:
                 self.fsm.update("walk", self)
-
             self.walked_distance += self.speed
-            self.rect.x += self.speed 
+            self.rect.x += self.speed
         else:
-
             if self.fsm.current == self.idle:
                 self.fsm.update("walk", self)
-
             self.walked_distance += self.speed
             self.rect.x -= self.speed
 
         if self.walked_distance >= KIRBY_PATROL_MAX_DISTANCE:
-            self.turned_right =  not self.turned_right
+            self.turned_right = not self.turned_right
             self.walked_distance = 0
-
-            if not self.turned_right:
-                self.image = pg.transform.flip(self.image, True, False)
-            else:
-                self.image = pg.transform.flip(self.image, False, False)
-                
+            self.image = pg.transform.flip(self.image, not self.turned_right, False)
             self.fsm.update("idle", self)
-            
-
-  
