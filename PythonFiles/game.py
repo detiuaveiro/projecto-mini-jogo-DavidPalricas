@@ -34,6 +34,9 @@ class Game:
             self.all_sprites = None
 
     def setup_pygame(self):
+        """
+        Initializes pygame and sets up the game window and clock.
+        """
         pg.init()
         window = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pg.display.set_caption("Super Bowser")
@@ -42,6 +45,9 @@ class Game:
         return window, clock
     
     def set_states(self):
+        """
+        Creates and associates the multiple states the game has.
+        """
         self.start_menu = fsm.StartMenu()
         self.playing = fsm.Playing()
         self.game_over = fsm.GameOver()
@@ -49,6 +55,9 @@ class Game:
         return [self.start_menu, self.playing, self.game_over]
     
     def set_transitions(self):
+        """
+        Manages the transitions based on the states created before.
+        """
         return {
             "start_game": fsm.Transition(self.start_menu, self.playing),
             "game_over": fsm.Transition(self.playing, self.game_over),
@@ -56,10 +65,16 @@ class Game:
         }
 
     def reset_game(self):
+        """
+        Resets the game by initializing the map and updating the FSM to the start game state.
+        """
         self.map = Map()
         self.fsm.update("start_game", self)
    
-    def play_level(self):        
+    def play_level(self):    
+        """
+        Updates all sprites, the camera, and handles game events and UI updates.
+        """
         self.all_sprites.update()
         self.camera.update(self.player)
         self.delta_time += self.clock.tick(FPS)
@@ -72,6 +87,9 @@ class Game:
             self.delta_time -= GAME_SECOND
 
     def setup_sprites(self):
+        """
+        Sets up the game sprites, including the player and multiple Kirby instances.
+        """
         all_sprites = pg.sprite.Group()
     
         player = Player((0, 235, 25, 31))
@@ -99,6 +117,9 @@ class Game:
         return all_sprites
     
     def setup_game_level(self):
+        """
+        Sets up the game level by initializing the map, sprites, player, camera, observer, audio players, and UI.
+        """
         self.map = Map()
         self.all_sprites = self.setup_sprites()  
         self.player = next(sprite for sprite in self.all_sprites if isinstance(sprite, Player)) 
@@ -109,6 +130,9 @@ class Game:
         self.ui = UI()
  
     def display_start_menu(self):
+        """
+        Displays the start menu screen with the game title and instructions.
+        """
         self.window.fill(COLORS["BLACK"])
         font_path = os.path.join(os.path.dirname(__file__), FONT_PATH)
         font = pg.font.Font(font_path, FONT_SIZE)
@@ -119,6 +143,9 @@ class Game:
 
 
     def display_end_game(self):
+        """
+        Displays the end game screen with the game over message and score.
+        """
         self.clear_level()
 
         self.window.fill(COLORS["BLACK"])
@@ -132,6 +159,9 @@ class Game:
         self.window.blit(instructions_text, (SCREEN_WIDTH // 2 - instructions_text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
     
     def clear_level(self):
+        """
+        Clears the current game level by resetting the map, sprites, player, camera, observer, and audio players.
+        """
         self.map = None
         self.all_sprites.empty()
         self.player = None
@@ -142,6 +172,9 @@ class Game:
       
 
 def update_display(game):
+    """
+    Updates the game display based on the current FSM state.
+    """
     if game.fsm.current == game.playing:
         game.window.fill(COLORS["BACKGROUND"])
         game.map.draw(game.window, game.camera)
@@ -153,6 +186,9 @@ def update_display(game):
     pg.display.flip()
 
 def event_handler(running, game):
+    """
+    Handles game events such as key presses and custom game events.
+    """
     for event in pg.event.get(): 
         if event.type == pg.QUIT:
             running = False
@@ -210,12 +246,18 @@ def event_handler(running, game):
     return running
 
 def get_audio_players():
+    """
+    Initializes and returns the audio players for music and sound effects.
+    """
     music_player = SoundPlayer(["overworld_theme", "game_over"], True)
     music_player.play("overworld_theme")
     sound_effecter = SoundPlayer(["jump","bowser_death","time_warning", "enemy_killed"], False)
     return [music_player, sound_effecter]
 
 def game_loop(game):
+    """
+    Main game loop that handles the game states and updates the display.
+    """
     running = True
 
     while running:
@@ -234,6 +276,9 @@ def game_loop(game):
     pg.quit()
 
 def main():
+    """
+    Entry point for the game. Initializes the game and starts the game loop.
+    """
     game = Game()
     game_loop(game)
 

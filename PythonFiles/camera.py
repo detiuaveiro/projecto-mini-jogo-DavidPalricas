@@ -37,9 +37,9 @@ class Camera:
         x = min(0, x)  # Left boundary
         y = min(0, y)  # Top boundary
         
-        # Assuming a large map width and height - adjust these as needed
-        map_width = 2000  # Example map width
-        map_height = 277  # Example map height
+        # map width and height 
+        map_width = 2000  
+        map_height = 277
         x = max(-(map_width - self.width), x)  # Right boundary
         y = max(-(map_height - self.height), y)  # Bottom boundary
 
