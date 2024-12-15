@@ -96,7 +96,7 @@ class Animator:
         
         return frames
 
-    def split_tileset(self, tile_set, sprite_width):
+    def split_tileset(self, tile_set, sprite_width,):
         """The split_tileset method is responsible for splitting the tileset into individual frames
 
             Args:
@@ -108,18 +108,21 @@ class Animator:
         """
 
         frames = []
-        
-        num_frames = round(tile_set.get_width() / sprite_width)
+        total_width = tile_set.get_width()
+        total_height = tile_set.get_height()
+
+        num_frames = total_width // sprite_width
+        remainder = total_width % sprite_width
 
         for i in range(num_frames):
-            if i == 0:
-                frame = tile_set.subsurface((i * sprite_width, 0, sprite_width, tile_set.get_height()))
-            else:
-                frame = tile_set.subsurface((i * sprite_width, 0, tile_set.get_width() - i * sprite_width, tile_set.get_height()))
-       
-            # To Ensure that all the frames have the same dimensions, scale the frame to the sprite original width
-            frame = pg.transform.scale(frame, (sprite_width, tile_set.get_height()))
+            frame = tile_set.subsurface((i * sprite_width, 0, sprite_width, total_height))
+            frame = pg.transform.scale(frame, (sprite_width, total_height))
+            frames.append(frame)
 
+        # Add the remianing frame to animation
+        if remainder > 0:
+            frame = tile_set.subsurface((num_frames * sprite_width, 0, remainder, total_height))
+            frame = pg.transform.scale(frame, (sprite_width, total_height))
             frames.append(frame)
 
         return frames

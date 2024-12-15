@@ -92,9 +92,6 @@ class Player(Sprite):
         
         self.animator.play_animation(self.fsm.current.name, self )
 
-
-        self.head_collider = pg.Rect((self.rect.x + 20, self.rect.y, 5, 5)) if self.turned_right else pg.Rect((self.rect.x + 10, self.rect.y, 5, 5)) 
-
     def move(self, keys):
         """ The move method is responsible for moving the player based on the pressed keys and sets the player idle if no movement key is pressed.
             If the player presses the space key, W key, or UP key, the initiate_jump method is called to make the player jump.
@@ -109,6 +106,7 @@ class Player(Sprite):
         for key in range(len(keys)):
             if keys[key]:
                 command = self.input_handler.commands.get(key, None)
+
                 if command:
                     command.execute(self)
                     handled_movement = True
@@ -127,6 +125,8 @@ class Player(Sprite):
         """ The move_right method is responsible for moving the player to the right, handling sprint and sprite flip.
             It also updates the player's state to walk if it's not already in that state.
         """
+
+
         if self.fsm.current != self.walk:
             self.fsm.update("walk", self)
 

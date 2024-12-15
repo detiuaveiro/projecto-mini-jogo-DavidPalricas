@@ -53,5 +53,5 @@ class InputHandler:
 
     def handle_input(self, key, player):
         command = self.commands.get(key, None)
-        if command:
+        if command and player is not None:
             command.execute(player)
