@@ -10,23 +10,24 @@ GAME_EVENTS = {"QUIT_GAME_EVENT": pg.USEREVENT + 1,
                "ENEMY_KILLED_EVENT": pg.USEREVENT + 7 
                }
 
-# Screen SIze Constants
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 277
+# Screen Dimensions Constants
+SCREEN_DIMENSIONS = {"WIDTH": 800, 
+                     "HEIGHT": 277}
 
 # Map Constants flor block constants and peach sprite path
-
 FLOOR_TILE_DIMENSIONS = {"WIDTH": 16, "HEIGHT": 19}
 FLOOR_BLOCK = 0
 FLOOR_BLOCK_SPRITE_PATH = "../Assets/SpriteSheets/Map/floor_block.png"
 PEACH_SPRITE_PATH = "../Assets/SpriteSheets/Peach/peach.png"
 
 # Time Constants
-GAME_TIME = 60
-ALERT_TIME = 20
-TIMEOUT = 0
-GAME_SECOND = 1000
+TIME = {"GAME_TIME": 20, 
+        "ALERT_TIME": 10,
+          "TIMEOUT": 0, 
+          "ONE_SECOND": 1000
+        }
 
+# Game Constants
 FPS = 60
 GRAVITY = 0.8
 

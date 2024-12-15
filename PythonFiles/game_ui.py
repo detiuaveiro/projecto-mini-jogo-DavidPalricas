@@ -1,4 +1,4 @@
-from consts import GAME_TIME, FONT_PATH, FONT_SIZE, COLORS
+from consts import TIME, FONT_PATH, FONT_SIZE, COLORS
 import pygame as pg
 import os
 
@@ -46,7 +46,7 @@ class UI:
         
         self._initialized = True
         self.score = 0
-        self.time = GAME_TIME
+        self.time = TIME["GAME_TIME"]
         self.font  = pg.font.Font(os.path.join(os.path.dirname(__file__), FONT_PATH ), FONT_SIZE)
         self.score_text_color =  COLORS["WHITE"]
         self.timer_text_color =  COLORS["WHITE"]
@@ -74,7 +74,7 @@ class UI:
         self.score  = self.score + points if self.score + points > 0 else 0
 
     def reset_labels_values(self):
-        self.time = GAME_TIME
+        self.time = TIME["GAME_TIME"]
         self.timer_text_color = COLORS["WHITE"]
         self.score = 0
 

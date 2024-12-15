@@ -1,5 +1,5 @@
 import pygame as pg
-from consts import ALERT_TIME, TIMEOUT, GAME_EVENTS, SCREEN_HEIGHT,PLAYER_MOVEMENT
+from consts import TIME, GAME_EVENTS, SCREEN_DIMENSIONS,PLAYER_MOVEMENT
 from player import Player
 from kirby import Kirby
 from game_map import Map
@@ -62,17 +62,17 @@ class Observer:
  def observe_player_in_void(self):
    """ The observe_player_in_void method checks if the player has fallen into the void in the game map, if it has, it posts an event of player death.""" 
 
-   if self.player.rect.y > SCREEN_HEIGHT:
+   if self.player.rect.y > SCREEN_DIMENSIONS["HEIGHT"]:
       pg.event.post(pg.event.Event(GAME_EVENTS["PLAYER_DEATH_EVENT"]))
 
 
  def observe_time_envents(self, game_time):  
    """ The observe_time method checks if the game time is equal to the alert time or the timeout time, and posts the corresponding event."""   
 
-   if game_time == ALERT_TIME:
+   if game_time == TIME["ALERT_TIME"]:
       pg.event.post(pg.event.Event(GAME_EVENTS["TIME_ALERT_EVENT"]))
      
-   if game_time <= TIMEOUT:
+   if game_time <= TIME["TIMEOUT"]:
       pg.event.post(pg.event.Event(GAME_EVENTS["TIMEOUT_EVENT"]))
   
 
