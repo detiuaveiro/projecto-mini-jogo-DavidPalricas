@@ -2,20 +2,21 @@ import os
 import copy
 import pygame as pg
 import finite_state_machine as fsm
-from entity import Entity
-from consts import KIRBY_IDLE_SPRITE_PATH, KIRBY_SPEED, KIRBY_PATROL_MAX_DISTANCE
+from sprite  import Sprite
+from consts import KIRBY_COLLIDER, KIRBY_PATHS, KIRBY_MOVEMENT
 
-class Kirby(Entity):
-    def __init__(self, collider): 
+class Kirby(Sprite):
+    def __init__(self, position): 
         """
         Initializes a new instance of the Kirby class, calling the Entity and Prototype constructors.
         """
-        sprite_path = os.path.join(os.path.dirname(__file__), KIRBY_IDLE_SPRITE_PATH)
-        super().__init__(sprite_path, collider)
+        sprite_path = os.path.join(os.path.dirname(__file__), KIRBY_PATHS["IDLE"])
+
+        super().__init__(sprite_path, position, KIRBY_COLLIDER)
 
         # Set up Kirby's attributes
         self.walked_distance = 0
-        self.speed = KIRBY_SPEED
+        self.speed = KIRBY_MOVEMENT["SPEED"]
         self.turned_right = True
         self.name = "Kirby"
         self.dead = False
@@ -81,7 +82,7 @@ class Kirby(Entity):
             self.walked_distance += self.speed
             self.rect.x -= self.speed
 
-        if self.walked_distance >= KIRBY_PATROL_MAX_DISTANCE:
+        if self.walked_distance >= KIRBY_MOVEMENT["PATROL_MAX_DISTANCE"]:
             self.turned_right = not self.turned_right
             self.walked_distance = 0
             self.image = pg.transform.flip(self.image, not self.turned_right, False)

@@ -1,5 +1,6 @@
 import pygame as pg
 import os
+from consts import PLAYER_PATHS, KIRBY_PATHS
 
 class Animator:
     """The Animator class is responsible for playing animations for the entities. It uses the Flyweight pattern to store shared instances of animations.
@@ -80,9 +81,9 @@ class Animator:
             return self._animations[key] 
         
         if entity.name == "Bowser":
-            image_path = os.path.join(os.path.dirname(__file__),  f"../Assets/SpriteSheets/{entity.name}/{state}/{entity.name}_{state}.png")
+            image_path = os.path.join(os.path.dirname(__file__),  f"{PLAYER_PATHS["ANIMATOR_BASE"]}/{state}/{entity.name}_{state}.png")
         else:
-            image_path = os.path.join(os.path.dirname(__file__), f"../Assets/SpriteSheets/Enemies/{entity.name}/{state}/{entity.name}_{state}.png")
+            image_path = os.path.join(os.path.dirname(__file__), f"{KIRBY_PATHS["ANIMATOR_BASE"]}/{state}/{entity.name}_{state}.png")
 
         new_image = pg.image.load(image_path).convert_alpha()
 

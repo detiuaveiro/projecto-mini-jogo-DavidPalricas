@@ -1,7 +1,7 @@
 import pygame as pg
 import os
 
-from consts import FLOOR_TILE_WIDTH, FLOOR_TILE_HEIGHT, FLOOR_BLOCK, FLOOR_BLOCK_SPRITE_PATH, PEACH_SPRITE_PATH
+from consts import FLOOR_TILE_DIMENSIONS, FLOOR_BLOCK, FLOOR_BLOCK_SPRITE_PATH, PEACH_SPRITE_PATH
 
 class Map:
     """ The Map class is responsible for creating the game map and drawing it on the screen.
@@ -82,18 +82,18 @@ class Map:
             for column_index, floor_block__index in enumerate(row):
 
                 if floor_block__index is FLOOR_BLOCK:  
-                    x, y = column_index * FLOOR_TILE_WIDTH, row_index * FLOOR_TILE_HEIGHT
+                    x, y = column_index * FLOOR_TILE_DIMENSIONS["WIDTH"], row_index * FLOOR_TILE_DIMENSIONS["HEIGHT"]
 
-                    floor_block_collider = pg.Rect(x, y, FLOOR_TILE_WIDTH, FLOOR_TILE_HEIGHT)
+                    floor_block_collider = pg.Rect(x, y, FLOOR_TILE_DIMENSIONS["WIDTH"], FLOOR_TILE_DIMENSIONS["HEIGHT"])
 
                     self.floor_blocks_colliders.append(floor_block_collider)
 
                     window.blit(self.floor_block_sprite, camera.apply(floor_block_collider))
 
                 elif floor_block__index is PEACH_SPRITE_PATH:
-                    x, y = column_index * FLOOR_TILE_WIDTH, row_index * FLOOR_TILE_HEIGHT
+                    x, y = column_index * FLOOR_TILE_DIMENSIONS["WIDTH"], row_index * FLOOR_TILE_DIMENSIONS["HEIGHT"]
 
-                    self.peach_collider = pg.Rect(x, y, FLOOR_TILE_WIDTH, FLOOR_TILE_HEIGHT)
+                    self.peach_collider = pg.Rect(x, y, FLOOR_TILE_DIMENSIONS["WIDTH"], FLOOR_TILE_DIMENSIONS["HEIGHT"])
 
                     window.blit(self.peach, camera.apply(self.peach_collider))
 
@@ -108,6 +108,6 @@ class Map:
         for row_index, row in enumerate(self.map):
             for column_index, floor_block__index in enumerate(row):
                 if floor_block__index is PEACH_SPRITE_PATH:
-                    x, y = column_index * FLOOR_TILE_WIDTH, row_index * FLOOR_TILE_HEIGHT
+                    x, y = column_index * FLOOR_TILE_DIMENSIONS["WIDTH"], row_index * FLOOR_TILE_DIMENSIONS["HEIGHT"]
                     return (x, y)
         return None

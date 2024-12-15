@@ -1,5 +1,5 @@
 import pygame as pg
-from consts import ALERT_TIME, TIMEOUT, GAME_EVENTS, SCREEN_HEIGHT, PLAYER_JUMP_SPEED
+from consts import ALERT_TIME, TIMEOUT, GAME_EVENTS, SCREEN_HEIGHT,PLAYER_MOVEMENT
 from player import Player
 from kirby import Kirby
 from game_map import Map
@@ -54,7 +54,7 @@ class Observer:
  def observe_player_jumped(self):
    """ The observe_player_jumped method checks if the player has jumped in the game, if it has, it posts an event of player jump.""" 
    # Check if the player has jumped
-   if self.player.velocity_y == -PLAYER_JUMP_SPEED:
+   if self.player.velocity_y == -PLAYER_MOVEMENT["JUMP_SPEED"] or self.player.velocity_y == -PLAYER_MOVEMENT["JUMP_SPEED_SPRINT"]:
       pg.event.post(pg.event.Event(GAME_EVENTS["PLAYER_JUMP_EVENT"]))
     
 

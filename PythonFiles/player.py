@@ -1,12 +1,12 @@
 import pygame as pg
-from entity import Entity
+from sprite import Sprite
 import finite_state_machine as fsm
 import os
 from command import MoveRightCommand, MoveLeftCommand, JumpCommand, SprintCommand, InputHandler
-from consts import PLAYER_SPEED, PLAYER_JUMP_SPEED, GRAVITY, PLAYER_FRICTION, SPRINT_SPEED, PLAYER_JUMP_SPEED_SPRINT, PLAYER_IDLE_SPRITE_PATH
+from consts import GRAVITY, PLAYER_SPAWN_POSITION , PLAYER_COLLIDER, PLAYER_MOVEMENT, PLAYER_PATHS
 
 
-class Player(Entity):
+class Player(Sprite):
     """
         The Player class is responsible for managing the player entity in the game world
        
@@ -16,7 +16,7 @@ class Player(Entity):
             - last_key_pressed: The last key pressed by the player
     """
 
-    def __init__(self, collider): 
+    def __init__(self): 
         """
             Initializes a new instance of the Player class, and calls the constructor of the Entity class (the parent class)
             Loads the sprite image for the player
@@ -27,8 +27,8 @@ class Player(Entity):
         """
 
         if not hasattr(self, 'initialized'):
-            sprite_path = os.path.join(os.path.dirname(__file__), PLAYER_IDLE_SPRITE_PATH)
-            super().__init__(sprite_path, collider)
+            sprite_path = os.path.join(os.path.dirname(__file__), PLAYER_PATHS["IDLE"])
+            super().__init__(sprite_path,PLAYER_SPAWN_POSITION, PLAYER_COLLIDER)
             
             # Set up the player's attributes
         
@@ -39,9 +39,6 @@ class Player(Entity):
             self.name = "Bowser"
             self.velocity_x = 0
             self.velocity_y = 0
-
-
-            self.on_block = None
 
             # Initialize FSM and states
             self.fsm = fsm.FSM(self.set_states(), self.set_transitions())
@@ -118,7 +115,7 @@ class Player(Entity):
 
         # Transition to idle state if no movement key is pressed
         if not handled_movement:
-            self.velocity_x *= PLAYER_FRICTION
+            self.velocity_x *= PLAYER_MOVEMENT["FRICTION"]
             self.fsm.update("idle", self)
 
 
@@ -133,7 +130,7 @@ class Player(Entity):
         if self.fsm.current != self.walk:
             self.fsm.update("walk", self)
 
-        self.velocity_x = PLAYER_SPEED
+        self.velocity_x = PLAYER_MOVEMENT["SPEED"]
 
         if not self.turned_right:
             self.image = pg.transform.flip(self.image, True, False)
@@ -146,7 +143,7 @@ class Player(Entity):
         if self.fsm.current != self.walk:
             self.fsm.update("walk", self)
             
-        self.velocity_x = -PLAYER_SPEED
+        self.velocity_x = -PLAYER_MOVEMENT["SPEED"]
 
         if self.turned_right:
             self.image = pg.transform.flip(self.image, True, False)
@@ -159,8 +156,8 @@ class Player(Entity):
 
         if self.is_on_ground:
             self.fsm.update("jump", self)
-            self.velocity_y = -PLAYER_JUMP_SPEED
-            
+            self.velocity_y = -PLAYER_MOVEMENT["JUMP_SPEED"]
+
     def apply_gravity(self):
         """ The apply_gravity method is responsible for applying gravity to the player, making it fall to the ground"""
 
@@ -174,16 +171,16 @@ class Player(Entity):
             It also updates the player's state to walk.
         """
         if self.fsm.current == self.walk:
-            self.velocity_x = SPRINT_SPEED if self.turned_right else -SPRINT_SPEED
+            self.velocity_x = PLAYER_MOVEMENT["SPRINT_SPEED"] if self.turned_right else -PLAYER_MOVEMENT["SPRINT_SPEED"]
 
         elif self.fsm.current == self.jump:
-            self.velocity_y = -PLAYER_JUMP_SPEED_SPRINT
+            self.velocity_y = -PLAYER_MOVEMENT["JUMP_SPEED_SPRINT"]
 
 
     def respawn(self):
         """ The respawn method is responsible for respawning the player at the starting position"""
-        self.rect.x = 0
-        self.rect.y = 235
+        self.rect.x = PLAYER_SPAWN_POSITION[0]
+        self.rect.y = PLAYER_SPAWN_POSITION[1]
 
     def quit_game(self):
         """ The quit_game method is responsible for quitting the game"""

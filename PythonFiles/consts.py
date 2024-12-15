@@ -15,8 +15,8 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 277
 
 # Map Constants flor block constants and peach sprite path
-FLOOR_TILE_WIDTH = 16
-FLOOR_TILE_HEIGHT = 19
+
+FLOOR_TILE_DIMENSIONS = {"WIDTH": 16, "HEIGHT": 19}
 FLOOR_BLOCK = 0
 FLOOR_BLOCK_SPRITE_PATH = "../Assets/SpriteSheets/Map/floor_block.png"
 PEACH_SPRITE_PATH = "../Assets/SpriteSheets/Peach/peach.png"
@@ -31,20 +31,41 @@ FPS = 60
 GRAVITY = 0.8
 
 # Player Constants
-PLAYER_SPEED = 1.8
-SPRINT_SPEED = PLAYER_SPEED * 2
-PLAYER_JUMP_SPEED = 10
-PLAYER_JUMP_SPEED_SPRINT = PLAYER_JUMP_SPEED * 1.5
-PLAYER_FRICTION = 0.8
-PLAYER_IDLE_SPRITE_PATH = "../Assets/SpriteSheets/Bowser/idle/bowser_idle.png"
+PLAYER_MOVEMENT = {"SPEED": 1.8, 
+                  "JUMP_SPEED": 10, 
+                  "FRICTION": 0.8, 
+                  "SPRINT_SPEED": 3.6, 
+                  "JUMP_SPEED_SPRINT": 15
+                }
+PLAYER_PATHS = {"IDLE": "../Assets/SpriteSheets/Bowser/idle/bowser_idle.png",
+                "ANIMATOR_BASE": "../Assets/SpriteSheets/Bowser/",
+               }
+PLAYER_COLLIDER = (25, 31)
+PLAYER_SPAWN_POSITION = (0, 235)
 
 # Kirby Constants
-KIRBY_IDLE_SPRITE_PATH = "../Assets/SpriteSheets/Enemies/Kirby/idle/kirby_idle.png"
-KIRBY_SPEED = 1.2
-KIRBY_PATROL_MAX_DISTANCE = 100
+KIRBY_PATHS = {"IDLE": "../Assets/SpriteSheets/Kirby/idle/kirby_idle.png",
+                "ANIMATOR_BASE": "../Assets/SpriteSheets/Kirby/",
+               }
+KIRBY_MOVEMENT = {"SPEED": 1.2,
+                  "PATROL_MAX_DISTANCE": 100
+                }
+KIRBY_COLLIDER = (18, 20)
+KIRBIES_SPAWN_POSITIONS = [(150, 252), (350, 252), (570, 195),(770, 138), (1000, 195)]
 
 
 # UI Constants
 FONT_PATH = "../Assets/Font/mario_nes.ttf"
 FONT_SIZE = 12
-COLORS = {"WHITE": (255, 255, 255), "RED": (255, 0, 0), "BLACK": (0, 0, 0), "BACKGROUND": (107, 136, 255)}
+COLORS = {"WHITE": (255, 255, 255), 
+          "RED": (255, 0, 0), 
+          "BLACK": (0, 0, 0), 
+          "BACKGROUND": (107, 136, 255)
+          }
+
+# Menus Constants
+MENUS_TEXT_FILE_PATHS = {"START_MENU": "../Assets/MenusText/start_menu.txt",
+                         "GAME_OVER_MENU": "../Assets/MenusText/game_over_menu.txt",
+                          "END_GAME_MENU": "../Assets/MenusText/end_game_menu.txt",
+                          "HIGH_SCORE" : "../Assets/MenusText/high_score.json"
+                        }

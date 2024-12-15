@@ -6,14 +6,40 @@ from kirby import Kirby
 from observer import Observer
 from sound_player import SoundPlayer
 from camera import Camera
-from consts import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, GAME_SECOND, GAME_EVENTS, FONT_PATH, FONT_SIZE, COLORS
+from consts import SCREEN_WIDTH, SCREEN_HEIGHT, FPS, GAME_SECOND, GAME_EVENTS, FONT_PATH, FONT_SIZE, COLORS, KIRBIES_SPAWN_POSITIONS, KIRBY_COLLIDER, MENUS_TEXT_FILE_PATHS
 from game_ui import UI
 import os
+import json
 
 class Game:
+    """ This class represents the game and manages the game states,and its atributtes.
+
+        Attributes:
+            - window: The game window.
+            - clock: The game clock.
+            - map: The game map.
+            - fsm: The game finite state machine.
+            - player: The game player.
+            - ui: The game user interface.
+            - audio_players: The game audio players.
+            - camera: The game camera.
+            - delta_time: The game delta time.
+            - all_sprites: The game sprites.
+            - _instance: The game instance.
+            - start_menu_text: The game start menu text.
+            - end_game_text: The game end game text.
+    """
     _instance = None
 
     def __new__(cls):
+        """
+        Creates a new instance of the game if it does not exist.
+        
+        Returns:
+            The game instance.
+            
+        """
+        
         if cls._instance is None:
             cls._instance = super(Game, cls).__new__(cls)
             cls._instance.__initialized = False
@@ -21,6 +47,9 @@ class Game:
         return cls._instance
     
     def __init__(self) -> None:
+        """
+        Initializes a new instance of the game, and setups the window, cllock, fsm, atributtes.
+        """
         if not self.__initialized:
             self.window, self.clock = self.setup_pygame()
             self.map = None
@@ -32,10 +61,13 @@ class Game:
             self.camera = None
             self.delta_time = 0
             self.all_sprites = None
+            self.menu_text = None
+            self.final_score_text = None
+            self.player_won = False
 
     def setup_pygame(self):
         """
-        Initializes pygame and sets up the game window and clock.
+        The setup_pygame method initializes the game window, clock, and sets the game title in the window.
         """
         pg.init()
         window = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -46,7 +78,10 @@ class Game:
     
     def set_states(self):
         """
-        Creates and associates the multiple states the game has.
+        The set_states method is responsible for setting the states of the game e.g. (start_menu, playing, game_over).
+
+        Returns:
+          - states (list): The list of the game's states.
         """
         self.start_menu = fsm.StartMenu()
         self.playing = fsm.Playing()
@@ -66,14 +101,16 @@ class Game:
 
     def reset_game(self):
         """
-        Resets the game by initializing the map and updating the FSM to the start game state.
+        The reset_game method is responsible for resetting the game by initializing the map and updating the FSM state.
         """
         self.map = Map()
         self.fsm.update("start_game", self)
    
     def play_level(self):    
         """
-        Updates all sprites, the camera, and handles game events and UI updates.
+        The play_level method is responsible for updating the game level by updating the sprites, camera, and UI.
+
+        An observer is used to observe the game , and if a event is triggered, the observer will notify the game.
         """
         self.all_sprites.update()
         self.camera.update(self.player)
@@ -88,37 +125,32 @@ class Game:
 
     def setup_sprites(self):
         """
-        Sets up the game sprites, including the player and multiple Kirby instances.
+        The setup_sprites method is responsible for adding the sprites of the player and the enemies (kirbies).
+
+        Returns:
+            - all_sprites (pygame.sprite.Group): The group of all game sprites.
         """
         all_sprites = pg.sprite.Group()
     
-        player = Player((0, 235, 25, 31))
+        player = Player()
         all_sprites.add(player)
-    
-        original_kirby = Kirby((150, 252, 18, 20))
-        all_sprites.add(original_kirby)
-    
-        kirby2 = original_kirby.clone()
-        kirby2.rect.topleft = (350, 252)
-        all_sprites.add(kirby2)
-    
-        kirby3 = original_kirby.clone()
-        kirby3.rect.topleft = (570, 195)
-        all_sprites.add(kirby3)
-    
-        kirby4 = original_kirby.clone()
-        kirby4.rect.topleft = (770, 138)
-        all_sprites.add(kirby4)
-    
-        kirby5 = original_kirby.clone()
-        kirby5.rect.topleft = (1000, 195)
-        all_sprites.add(kirby5)
-    
-        return all_sprites
-    
+       
+        first_kirby = None
+
+        for kirby_position in KIRBIES_SPAWN_POSITIONS:
+            if KIRBIES_SPAWN_POSITIONS.index(kirby_position) == 0:
+                first_kirby = Kirby(kirby_position)
+                all_sprites.add(first_kirby)
+            else:
+                kirby = first_kirby.clone()
+                kirby.rect.topleft = kirby_position
+                all_sprites.add(kirby)
+
+        return all_sprites       
+     
     def setup_game_level(self):
         """
-        Sets up the game level by initializing the map, sprites, player, camera, observer, audio players, and UI.
+        The setup_game_level method is responsible for setting up the game level by initializing the map, sprites, player, camera, observer, and audio players.
         """
         self.map = Map()
         self.all_sprites = self.setup_sprites()  
@@ -131,33 +163,120 @@ class Game:
  
     def display_start_menu(self):
         """
-        Displays the start menu screen with the game title and instructions.
+        The display_start_menu method is responsible for displaying the start menu screen with the game title and instructions.
         """
+
         self.window.fill(COLORS["BLACK"])
-        font_path = os.path.join(os.path.dirname(__file__), FONT_PATH)
-        font = pg.font.Font(font_path, FONT_SIZE)
-        title_text = font.render("Super Bowser", True, COLORS["WHITE"])
-        instructions_text = font.render("Press Enter to Start", True, COLORS["WHITE"])
-        self.window.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 2 - 100))
-        self.window.blit(instructions_text, (SCREEN_WIDTH // 2 - instructions_text.get_width() // 2, SCREEN_HEIGHT // 2))
+    
+        title_font = pg.font.Font(os.path.join(os.path.dirname(__file__), FONT_PATH),FONT_SIZE + 4)
+        title_font.bold = True
+       
+        if self.menu_text is None:
+            self.load_menu_text_file(MENUS_TEXT_FILE_PATHS["START_MENU"])
+
+        self.write_menu_text(title_font)
+
+    def write_menu_text(self, title_font = None):
+        """ The write_menu_text method is responsible for writing the menu text on the screen.
+
+        Args:
+            - title_font (pygame.font.Font): The title font.
+        """
+
+        y_offset = SCREEN_HEIGHT // 2 - 100
+
+
+        text_font = pg.font.Font(os.path.join(os.path.dirname(__file__), FONT_PATH), FONT_SIZE)
+
+        for line in self.menu_text:
+            if  title_font is not None:
+                line_text = text_font.render(line.strip(), True, COLORS["WHITE"])
+                title_font = None
+            else:
+                print("boas")
+                line_text = text_font.render(line.strip(), True, COLORS["WHITE"])
+
+            self.window.blit(line_text, (SCREEN_WIDTH // 2 - line_text.get_width() // 2, y_offset))
+            y_offset += FONT_SIZE + 5
+
+    def load_menu_text_file(self,file_path):
+        """
+        The load_menu_text_file method is responsible for loading  a menu text file.
+
+        Args:
+            - file_path (str): The path to the menu text file.
+        """
+        
+        full_path = os.path.join(os.path.dirname(__file__), file_path)
+
+        try:
+            with open(full_path, "r") as file:    
+                self.menu_text = file.readlines()
+                
+        except FileNotFoundError:
+            print("Menu text file not found")
 
 
     def display_end_game(self):
         """
         Displays the end game screen with the game over message and score.
         """
-        self.clear_level()
 
         self.window.fill(COLORS["BLACK"])
-        font_path = os.path.join(os.path.dirname(__file__), FONT_PATH)
-        font = pg.font.Font(font_path, FONT_SIZE)
-        game_over_text = font.render("Game Over", True, COLORS["WHITE"])
-        score_text = font.render(f"Score: {self.ui.score}", True, COLORS["WHITE"])
-        instructions_text = font.render("Press Enter to play again", True, COLORS["WHITE"])
-        self.window.blit(game_over_text, (SCREEN_WIDTH // 2 - game_over_text.get_width() // 2, SCREEN_HEIGHT // 2 - 100))
-        self.window.blit(score_text, (SCREEN_WIDTH // 2 - score_text.get_width() // 2, SCREEN_HEIGHT // 2))
-        self.window.blit(instructions_text, (SCREEN_WIDTH // 2 - instructions_text.get_width() // 2, SCREEN_HEIGHT // 2 + 100))
     
+        if self.final_score_text is None:
+            self.final_score_text = self.load_score_text()
+
+        self.clear_level()
+
+        if self.menu_text is None:
+            text_path = MENUS_TEXT_FILE_PATHS["END_GAME_MENU"] if self.player_won else MENUS_TEXT_FILE_PATHS["GAME_OVER_MENU"]
+            self.load_menu_text_file(text_path)
+
+        self.write_menu_text()
+
+        text_font = pg.font.Font(os.path.join(os.path.dirname(__file__), FONT_PATH), FONT_SIZE )
+
+        score_label = text_font.render(self.final_score_text, True, COLORS["WHITE"])
+        self.window.blit(score_label, (SCREEN_WIDTH // 2 - score_label.get_width() // 2, SCREEN_HEIGHT - 100))
+    
+
+    def load_score_text(self):
+        """
+        The load_score_text method is responsible for loading the score text.
+        If the player has a new high score, it will return a new high score message, otherwise it will return the player's score and its high score.
+
+        Returns:
+            - score_text (pygame.Surface): The score text.
+        """
+
+        final_score = self.ui.score + self.ui.time
+        
+        high_score_file_path = os.path.join(os.path.dirname(__file__), MENUS_TEXT_FILE_PATHS["HIGH_SCORE"])
+        
+        new_high_score = False
+        previous_high_score = None
+
+        try:
+            with open (high_score_file_path, "r+") as file:
+                json_file = json.load(file)
+                previous_high_score = json_file.get("high_score")
+
+                if final_score > previous_high_score:
+                    new_high_score = True
+                    json_file["high_score"] = final_score
+                    file.seek(0)
+                    json.dump(json_file, file)
+                    file.truncate()
+
+        except FileNotFoundError:
+            print("High score file not found")
+
+        if new_high_score:
+            return f"New High Score: {final_score}"
+        
+        return "Score: {final_score}\nYour High Score : {previous_high_score}"
+
     def clear_level(self):
         """
         Clears the current game level by resetting the map, sprites, player, camera, observer, and audio players.
@@ -167,8 +286,9 @@ class Game:
         self.player = None
         self.camera = None
         self.observer = None
-        self.audio_players = None
         self.delta_time = None
+        self.game_over_text = None
+        self.final_score_text = None
       
 
 def update_display(game):
@@ -203,6 +323,9 @@ def event_handler(running, game):
                 game.setup_game_level()
                 game.fsm.update("start_game", game)
 
+            elif event.key == pg.K_ESCAPE:
+                running = False
+
         elif event.type == GAME_EVENTS["QUIT_GAME_EVENT"]:
             print("Quit game event triggered")
             running = False
@@ -215,6 +338,7 @@ def event_handler(running, game):
 
         elif event.type == GAME_EVENTS["TIMEOUT_EVENT"]:
             game.clear_level()
+            game.menu_text = None
 
             game.fsm.update("game_over", game)
 
@@ -223,13 +347,16 @@ def event_handler(running, game):
 
         elif event.type == GAME_EVENTS["TIME_ALERT_EVENT"]:
             game.ui.change_timer_text_color()
+
             game.audio_players[1].play("time_warning")
 
         elif event.type == GAME_EVENTS["PLAYER_JUMP_EVENT"]:
             game.audio_players[1].play("jump")
 
         elif event.type == GAME_EVENTS["END_GAME_EVENT"]:
-            print("End of game")
+            game.player_won = True
+            game.menu_text = None
+
             game.audio_players[0].stop()
 
             game.fsm.update("game_over", game)
@@ -249,9 +376,9 @@ def get_audio_players():
     """
     Initializes and returns the audio players for music and sound effects.
     """
-    music_player = SoundPlayer(["overworld_theme", "game_over"], True)
+    music_player = SoundPlayer(["overworld_theme"], True)
     music_player.play("overworld_theme")
-    sound_effecter = SoundPlayer(["jump","bowser_death","time_warning", "enemy_killed"], False)
+    sound_effecter = SoundPlayer(["jump","bowser_death","time_warning", "enemy_killed", "end_game","game_over"], False)
     return [music_player, sound_effecter]
 
 def game_loop(game):
