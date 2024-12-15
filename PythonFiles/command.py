@@ -51,5 +51,7 @@ class InputHandler:
     def set_command(self, key, command):
         self.commands[key] = command
 
-    def handle_input(self, key):
-        return self.commands.get(key, None)
+    def handle_input(self, key, player):
+        command = self.commands.get(key, None)
+        if command:
+            command.execute(player)

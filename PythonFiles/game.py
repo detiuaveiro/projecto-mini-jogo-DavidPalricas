@@ -8,6 +8,7 @@ from sound_player import SoundPlayer
 from camera import Camera
 from consts import SCREEN_DIMENSIONS, FPS, TIME, GAME_EVENTS, FONT_PATH, FONT_SIZE, COLORS, KIRBIES_SPAWN_POSITIONS, MENUS_TEXT_FILE_PATHS
 from game_ui import UI
+from command import InputHandler
 import os
 import json
 
@@ -308,11 +309,14 @@ def event_handler(running, game):
     """
     Handles game events such as key presses and custom game events.
     """
+    input_handler = InputHandler()
     for event in pg.event.get(): 
         if event.type == pg.QUIT:
             running = False
 
         if event.type == pg.KEYDOWN:
+            input_handler.handle_input(event.key, game.player)
+            
             if event.key == pg.K_RETURN and game.fsm.current == game.game_over:
                 game.ui.reset_labels_values()
                 game.final_score_text = None
@@ -369,6 +373,15 @@ def event_handler(running, game):
                     game.all_sprites.remove(sprite)
 
             game.ui.update_score(100)
+
+    # Handle continuous key presses
+    keys = pg.key.get_pressed()
+    if keys[pg.K_UP] or keys[pg.K_w]:
+        input_handler.handle_input(pg.K_UP, game.player)
+    if keys[pg.K_LEFT] or keys[pg.K_a]:
+        input_handler.handle_input(pg.K_LEFT, game.player)
+    if keys[pg.K_RIGHT] or keys[pg.K_d]:
+        input_handler.handle_input(pg.K_RIGHT, game.player)
 
     return running
 

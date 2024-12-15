@@ -108,7 +108,7 @@ class Player(Sprite):
 
         for key in range(len(keys)):
             if keys[key]:
-                command = self.input_handler.handle_input(key)
+                command = self.input_handler.commands.get(key, None)
                 if command:
                     command.execute(self)
                     handled_movement = True
