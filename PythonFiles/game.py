@@ -9,6 +9,7 @@ from camera import Camera
 from consts import SCREEN_DIMENSIONS, FPS, TIME, GAME_EVENTS, FONT_PATH, FONT_SIZE, COLORS, KIRBIES_SPAWN_POSITIONS, MENUS_TEXT_FILE_PATHS
 from game_ui import UI
 from command import InputHandler
+from peach import Peach
 import os
 import json
 
@@ -135,6 +136,10 @@ class Game:
     
         player = Player()
         all_sprites.add(player)
+
+
+        peach = Peach()
+        all_sprites.add(peach)
        
         first_kirby = None
 

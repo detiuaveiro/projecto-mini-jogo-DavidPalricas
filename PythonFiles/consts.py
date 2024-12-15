@@ -18,6 +18,10 @@ SCREEN_DIMENSIONS = {"WIDTH": 800,
 FLOOR_TILE_DIMENSIONS = {"WIDTH": 16, "HEIGHT": 19}
 FLOOR_BLOCK = 0
 FLOOR_BLOCK_SPRITE_PATH = "../Assets/SpriteSheets/Map/floor_block.png"
+
+# Peach Constants
+PEACH_COLLIDER = (16, 16)
+PEACH_SPAWN_POSITION = (1445, 240)
 PEACH_SPRITE_PATH = "../Assets/SpriteSheets/Peach/peach.png"
 
 # Time Constants

@@ -2,6 +2,7 @@ import pygame as pg
 from consts import TIME, GAME_EVENTS, SCREEN_DIMENSIONS,PLAYER_MOVEMENT
 from player import Player
 from kirby import Kirby
+from peach import Peach
 from game_map import Map
 
 class Observer:
@@ -38,18 +39,18 @@ class Observer:
 
    enemies = [sprite for sprite in all_sprites if isinstance(sprite, Kirby)]
 
-   
+   peach = next(sprite for sprite in all_sprites if isinstance(sprite, Peach))
+
    self.observe_player_jumped()
 
    self.observe_player_in_void()
 
-   self.check_endgame()
+   self.check_endgame(peach)
 
    self.observe_floor_collisions()
 
    if len(enemies) > 0:
       self.observe_enemy_collision(enemies)
-
 
  def observe_player_jumped(self):
    """ The observe_player_jumped method checks if the player has jumped in the game, if it has, it posts an event of player jump.""" 
@@ -57,8 +58,6 @@ class Observer:
    if self.player.velocity_y == -PLAYER_MOVEMENT["JUMP_SPEED"] or self.player.velocity_y == -PLAYER_MOVEMENT["JUMP_SPEED_SPRINT"]:
       pg.event.post(pg.event.Event(GAME_EVENTS["PLAYER_JUMP_EVENT"]))
     
-
-
  def observe_player_in_void(self):
    """ The observe_player_in_void method checks if the player has fallen into the void in the game map, if it has, it posts an event of player death.""" 
 
@@ -67,7 +66,12 @@ class Observer:
 
 
  def observe_time_envents(self, game_time):  
-   """ The observe_time method checks if the game time is equal to the alert time or the timeout time, and posts the corresponding event."""   
+   """ The observe_time method checks if the game time is equal to the alert time or the timeout time, and posts the corresponding event.
+   
+      Args:
+         - game_time (int): The current game time.
+         
+   """   
 
    if game_time == TIME["ALERT_TIME"]:
       pg.event.post(pg.event.Event(GAME_EVENTS["TIME_ALERT_EVENT"]))
@@ -76,10 +80,10 @@ class Observer:
       pg.event.post(pg.event.Event(GAME_EVENTS["TIMEOUT_EVENT"]))
   
 
- def check_endgame(self):
+ def check_endgame(self, peach):
     """ The check_endgame method checks if the player has collided with the peach sprite in the game map, if it has, it posts an event to end the game."""
 
-    if self.game_map.peach_collider is not None  and self.player.rect.colliderect(self.game_map.peach_collider):
+    if self.player.rect.colliderect(peach.rect): 
       pg.event.post(pg.event.Event(GAME_EVENTS["END_GAME_EVENT"]))
    
 
@@ -110,6 +114,9 @@ class Observer:
       """ The observe_enemy_collision method checks if the player has collided with any of the enemies in the game.
             If the player has collided with an enemy, it checks if the player is above the enemy.
             If the player is above the enemy, it posts an event to kill the enemy otherwise the player dies and posts and event of player death.
+
+         Args:
+            - enemies (list): The list of enemy sprites.
       """
 
       enemies_colliders = [enemy.rect for enemy in enemies]

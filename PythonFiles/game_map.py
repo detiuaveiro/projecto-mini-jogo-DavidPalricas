@@ -61,7 +61,7 @@ class Map:
                     [],
                     [None] * 34 + [FLOOR_BLOCK] * 10 + [None] * 16 + [FLOOR_BLOCK] * 10, 
                     [],
-                    [None] * 90 + [PEACH_SPRITE_PATH],
+                    [None] * 90,
                     [FLOOR_BLOCK] * 31 + [None] * 56 + [FLOOR_BLOCK] * 5,
         ]
 
@@ -89,13 +89,6 @@ class Map:
                     self.floor_blocks_colliders.append(floor_block_collider)
 
                     window.blit(self.floor_block_sprite, camera.apply(floor_block_collider))
-
-                elif floor_block__index is PEACH_SPRITE_PATH:
-                    x, y = column_index * FLOOR_TILE_DIMENSIONS["WIDTH"], row_index * FLOOR_TILE_DIMENSIONS["HEIGHT"]
-
-                    self.peach_collider = pg.Rect(x, y, FLOOR_TILE_DIMENSIONS["WIDTH"], FLOOR_TILE_DIMENSIONS["HEIGHT"])
-
-                    window.blit(self.peach, camera.apply(self.peach_collider))
 
 
     def get_peach_position(self):
