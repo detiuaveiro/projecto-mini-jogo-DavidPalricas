@@ -51,7 +51,8 @@ class Game:
         Initializes a new instance of the game, and setups the window, cllock, fsm, atributtes.
         """
         if not self.__initialized:
-            self.window, self.clock = self.setup_pygame()
+            self.window = self.setup_pygame()
+            self.clock = None
             self.map = None
             self.fsm = fsm.FSM(self.set_states(), self.set_transitions())
             self.__initialized = True
@@ -67,14 +68,13 @@ class Game:
 
     def setup_pygame(self):
         """
-        The setup_pygame method initializes the game window, clock, and sets the game title in the window.
+        The setup_pygame method initializes the pygame and its windows with the screen dimensions and title.
         """
         pg.init()
         window = pg.display.set_mode((SCREEN_DIMENSIONS["WIDTH"], SCREEN_DIMENSIONS["HEIGHT"]))
         pg.display.set_caption("Super Bowser")
-        clock = pg.time.Clock()
-
-        return window, clock
+    
+        return window
     
     def set_states(self):
         """
@@ -160,6 +160,7 @@ class Game:
         self.audio_players = get_audio_players()
         self.delta_time = 0
         self.ui = UI()
+        self.clock = pg.time.Clock()
  
     def display_start_menu(self):
         """
@@ -285,6 +286,7 @@ class Game:
         self.observer = None
         self.delta_time = None
         self.game_over_text = None
+        self.clock = None
   
       
 
