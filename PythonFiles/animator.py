@@ -81,9 +81,9 @@ class Animator:
             return self._animations[key] 
         
         if entity.name == "Bowser":
-            image_path = os.path.join(os.path.dirname(__file__),  f"{PLAYER_PATHS["ANIMATOR_BASE"]}/{state}/{entity.name}_{state}.png")
+            image_path = os.path.join(os.path.dirname(__file__),  f"{PLAYER_PATHS['ANIMATOR_BASE']}/{state}/{entity.name}_{state}.png")
         else:
-            image_path = os.path.join(os.path.dirname(__file__), f"{KIRBY_PATHS["ANIMATOR_BASE"]}/{state}/{entity.name}_{state}.png")
+            image_path = os.path.join(os.path.dirname(__file__), f"{KIRBY_PATHS['ANIMATOR_BASE']}/{state}/{entity.name}_{state}.png")
 
         new_image = pg.image.load(image_path).convert_alpha()
 
