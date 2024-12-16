@@ -30,10 +30,6 @@ class Player(Sprite):
             sprite_path = os.path.join(os.path.dirname(__file__), PLAYER_PATHS["IDLE"])
             super().__init__(sprite_path,PLAYER_SPAWN_POSITION, PLAYER_COLLIDER)
             
-            # Set up the player's attributes
-        
-            # Set up the attributes inherited from the Entity class
-        
             self.is_on_ground = True
             self.turned_right = True
             self.name = "Bowser"
