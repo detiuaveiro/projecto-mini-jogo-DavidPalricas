@@ -1,5 +1,7 @@
 # Super Bowser
  Super Bowser is a plataformer 2D, similiar to super mario Bros (NES) made in python using the pygame framework
+
+ The player's goal is to kidnap Princess Peach before time runs out and avoiding kirbies
  <hr>
  
  # Requirments
@@ -10,8 +12,8 @@
  <hr>
  
   # Controls
- |Keys         |Move Right| Move Left|  Jump   | Sprint |
- |:-----------:|:--------:|:--------:|:-------:|:------:|
- | WASD Keys   |   `D`    |   `A`    |   `W`   |        |
- | Arrow Keys  | `Right`  |  `Left`  |   `Up`  |        | 
- | Other Keys  |          |          | `Space` |`LShift`|
+ |Keys         |Move Right| Move Left|  Jump   | Sprint | Exit Game   |
+ |:-----------:|:--------:|:--------:|:-------:|:------:|:-----------:|
+ | WASD Keys   |   `D`    |   `A`    |   `W`   |        |             |
+ | Arrow Keys  | `Right`  |  `Left`  |   `Up`  |        |             |
+ | Other Keys  |          |          | `Space` |`LShift`| `Escape Key`|
