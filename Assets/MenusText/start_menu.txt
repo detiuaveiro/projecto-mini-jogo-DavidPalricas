@@ -8,7 +8,6 @@ Controls:
     Move Left -> Left key or A key
     Move Right -> Right key or D key
     Jump -> W key, Up key or Space key
-    Sprint -> LShift key
     Exit -> Escape Key
 
 Press Enter to start.

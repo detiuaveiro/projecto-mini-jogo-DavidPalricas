@@ -55,7 +55,7 @@ class Observer:
  def observe_player_jumped(self):
    """ The observe_player_jumped method checks if the player has jumped in the game, if it has, it posts an event of player jump.""" 
    # Check if the player has jumped
-   if self.player.velocity_y == -PLAYER_MOVEMENT["JUMP_SPEED"] or self.player.velocity_y == -PLAYER_MOVEMENT["JUMP_SPEED_SPRINT"]:
+   if self.player.velocity_y == -PLAYER_MOVEMENT["JUMP_SPEED"] :
       pg.event.post(pg.event.Event(GAME_EVENTS["PLAYER_JUMP_EVENT"]))
     
  def observe_player_in_void(self):

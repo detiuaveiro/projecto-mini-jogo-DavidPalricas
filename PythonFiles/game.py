@@ -379,15 +379,6 @@ def event_handler(running, game):
 
             game.ui.update_score(100)
 
-    # Handle continuous key presses
-    keys = pg.key.get_pressed()
-    if keys[pg.K_UP] or keys[pg.K_w]:
-        input_handler.handle_input(pg.K_UP, game.player)
-    if keys[pg.K_LEFT] or keys[pg.K_a]:
-        input_handler.handle_input(pg.K_LEFT, game.player)
-    if keys[pg.K_RIGHT] or keys[pg.K_d]:
-        input_handler.handle_input(pg.K_RIGHT, game.player)
-
     return running
 
 def get_audio_players():

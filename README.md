@@ -12,8 +12,8 @@
  <hr>
  
   # Controls
- |Keys         |Move Right| Move Left|  Jump   | Sprint | Exit Game   |
- |:-----------:|:--------:|:--------:|:-------:|:------:|:-----------:|
- | WASD Keys   |   `D`    |   `A`    |   `W`   |        |             |
- | Arrow Keys  | `Right`  |  `Left`  |   `Up`  |        |             |
- | Other Keys  |          |          | `Space` |`LShift`| `Escape Key`|
+ |Keys         |Move Right| Move Left|  Jump   | Exit Game   |
+ |:-----------:|:--------:|:--------:|:-------:|:-----------:|
+ | WASD Keys   |   `D`    |   `A`    |   `W`   |             |
+ | Arrow Keys  | `Right`  |  `Left`  |   `Up`  |             |
+ | Other Keys  |          |          | `Space` |`Escape`     |

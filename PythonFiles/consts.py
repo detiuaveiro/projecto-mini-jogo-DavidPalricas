@@ -39,9 +39,7 @@ GRAVITY = 0.8
 PLAYER_MOVEMENT = {"SPEED": 1.8, 
                   "JUMP_SPEED": 10, 
                   "FRICTION": 0.8, 
-                  "SPRINT_SPEED": 3.6, 
-                  "JUMP_SPEED_SPRINT": 15
-                }
+                  } 
 PLAYER_PATHS = {"IDLE": "../Assets/SpriteSheets/Bowser/idle/bowser_idle.png",
                 "ANIMATOR_BASE": "../Assets/SpriteSheets/Bowser/",
                }

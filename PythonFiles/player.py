@@ -2,7 +2,7 @@ import pygame as pg
 from sprite import Sprite
 import finite_state_machine as fsm
 import os
-from command import MoveRightCommand, MoveLeftCommand, JumpCommand, SprintCommand, InputHandler
+from command import InputHandler
 from consts import GRAVITY, PLAYER_SPAWN_POSITION , PLAYER_COLLIDER, PLAYER_MOVEMENT, PLAYER_PATHS
 
 
@@ -43,16 +43,8 @@ class Player(Sprite):
             # Initialize FSM and states
             self.fsm = fsm.FSM(self.set_states(), self.set_transitions())
 
-            # Initialize InputHandler
             self.input_handler = InputHandler()
-            self.input_handler.set_command(pg.K_SPACE, JumpCommand())
-            self.input_handler.set_command(pg.K_UP, JumpCommand())
-            self.input_handler.set_command(pg.K_w, JumpCommand())
-            self.input_handler.set_command(pg.K_RIGHT, MoveRightCommand())
-            self.input_handler.set_command(pg.K_d, MoveRightCommand())
-            self.input_handler.set_command(pg.K_a, MoveLeftCommand())
-            self.input_handler.set_command(pg.K_LEFT, MoveLeftCommand())
-            self.input_handler.set_command(pg.K_LSHIFT, SprintCommand())
+
 
     def set_states(self):
         """ The set_states method is responsible for setting the states of the player e.g. (idle, walk, jump)
@@ -103,13 +95,10 @@ class Player(Sprite):
         """
         handled_movement = False
 
-        for key in range(len(keys)):
+        for key, command in self.input_handler.commands.items():
             if keys[key]:
-                command = self.input_handler.commands.get(key, None)
-
-                if command:
-                    command.execute(self)
-                    handled_movement = True
+                command.execute(self)
+                handled_movement = True
 
         # Transition to idle state if no movement key is pressed
         if not handled_movement:
@@ -122,11 +111,9 @@ class Player(Sprite):
         self.rect.y += self.velocity_y
 
     def move_right(self):
-        """ The move_right method is responsible for moving the player to the right, handling sprint and sprite flip.
+        """ The move_right method is responsible for moving the player to the right  and sprite flip.
             It also updates the player's state to walk if it's not already in that state.
         """
-
-
         if self.fsm.current != self.walk:
             self.fsm.update("walk", self)
 
@@ -137,7 +124,7 @@ class Player(Sprite):
             self.turned_right = True
 
     def move_left(self):
-        """ The move_left method is responsible for moving the player to the left, handling sprint and sprite flip.
+        """ The move_left method is responsible for moving the player to the left  and sprite flip.
             It also updates the player's state to walk if it's not already in that state.
         """
         if self.fsm.current != self.walk:
@@ -165,17 +152,6 @@ class Player(Sprite):
          
         if self.velocity_y > 0:    
             self.fsm.update("fall", self)
-
-    def sprint(self):
-        """ The sprint method is responsible for making the player sprint if the player is walking.
-            It also updates the player's state to walk.
-        """
-        if self.fsm.current == self.walk:
-            self.velocity_x = PLAYER_MOVEMENT["SPRINT_SPEED"] if self.turned_right else -PLAYER_MOVEMENT["SPRINT_SPEED"]
-
-        elif self.fsm.current == self.jump:
-            self.velocity_y = -PLAYER_MOVEMENT["JUMP_SPEED_SPRINT"]
-
 
     def respawn(self):
         """ The respawn method is responsible for respawning the player at the starting position"""
